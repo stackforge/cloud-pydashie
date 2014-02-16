@@ -65,3 +65,19 @@ class ConvergenceSampler(DashieSampler):
         if len(self.items) > 10:
             self.items.popleft()
         return {'points': list(self.items)}
+
+
+class ProgressBarsSampler(DashieSampler):
+    def __init__(self, *args, **kwargs):
+        DashieSampler.__init__(self, *args, **kwargs)
+    
+    def name(self):
+        return 'progress_bars'
+
+    def sample(self):
+        random_progress = []
+        
+        for i in range(5):
+            random_progress.append({'name': "Project %d" % i, 'progress': random.randint(0, 100)})
+    
+        return {'title': "Progress Bars Title", 'progress_items': random_progress}

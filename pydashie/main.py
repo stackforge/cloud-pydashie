@@ -40,6 +40,7 @@ def javascripts():
             #'widgets/clock/clock.coffee',
             'widgets/number/number.coffee',
             'widgets/hotness/hotness.coffee',
+            'widgets/progress_bars/progress_bars.coffee',
         ]
         nizzle = True
         if not nizzle:
