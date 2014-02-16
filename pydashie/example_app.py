@@ -7,6 +7,7 @@ def run(app, xyzzy):
         BuzzwordsSampler(xyzzy, 2), # 10
         ConvergenceSampler(xyzzy, 1),
         ProgressBarsSampler(xyzzy, 5),
+        UsageGaugeSampler(xyzzy, 3),
     ]
 
     try:

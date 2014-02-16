@@ -41,6 +41,7 @@ def javascripts():
             'widgets/number/number.coffee',
             'widgets/hotness/hotness.coffee',
             'widgets/progress_bars/progress_bars.coffee',
+            'widgets/usage_gauge/usage_gauge.coffee',
         ]
         nizzle = True
         if not nizzle:

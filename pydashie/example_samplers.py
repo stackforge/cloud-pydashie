@@ -81,3 +81,15 @@ class ProgressBarsSampler(DashieSampler):
             random_progress.append({'name': "Project %d" % i, 'progress': random.randint(0, 100)})
     
         return {'title': "Progress Bars Title", 'progress_items': random_progress}
+
+
+class UsageGaugeSampler(DashieSampler):
+    def __init__(self, *args, **kwargs):
+        DashieSampler.__init__(self, *args, **kwargs)
+
+    def name(self):
+        return 'usage_gauge'
+
+    def sample(self):
+        return {'value': random.randint(0, 100), 'max': 100}
+
