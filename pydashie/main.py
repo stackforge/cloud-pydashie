@@ -39,6 +39,7 @@ def javascripts():
             'assets/javascripts/app.js',
             #'widgets/clock/clock.coffee',
             'widgets/number/number.coffee',
+            'widgets/hotness/hotness.coffee',
         ]
         nizzle = True
         if not nizzle:

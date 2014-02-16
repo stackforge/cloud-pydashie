@@ -18,6 +18,21 @@ class SynergySampler(DashieSampler):
         self._last = s['current']
         return s
 
+class HotnessSampler(DashieSampler):
+    def __init__(self, *args, **kwargs):
+        DashieSampler.__init__(self, *args, **kwargs)
+        self._last = 0
+
+    def name(self):
+        return 'hotness'
+
+    def sample(self):
+        s = {'value': random.randint(0, 100),
+             'current': random.randint(0, 100),
+             'last': self._last}
+        self._last = s['current']
+        return s
+
 class BuzzwordsSampler(DashieSampler):
     def name(self):
         return 'buzzwords'

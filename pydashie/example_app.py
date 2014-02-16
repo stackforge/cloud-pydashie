@@ -3,6 +3,7 @@ from example_samplers import *
 def run(app, xyzzy):
     samplers = [
         SynergySampler(xyzzy, 3),
+        HotnessSampler(xyzzy, 3),
         BuzzwordsSampler(xyzzy, 2), # 10
         ConvergenceSampler(xyzzy, 1),
     ]
