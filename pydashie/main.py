@@ -49,6 +49,7 @@ def javascripts():
 
         output = []
         for path in scripts:
+            path = '{1}/{0}'.format(path,os.path.dirname(os.path.realpath(__file__)))
             output.append('// JS: %s\n' % path)
             if '.coffee' in path:
                 log.info('Compiling Coffee for %s ' % path)
@@ -83,6 +84,7 @@ def application_css():
     ]
     output = ''
     for path in scripts:
+        path = '{1}/{0}'.format(path,os.path.dirname(os.path.realpath(__file__)))
         output = output + open(path).read()
     return Response(output, mimetype='text/css')
 
@@ -94,7 +96,7 @@ def send_static_img(filename):
 @app.route('/views/<widget_name>.html')
 def widget_html(widget_name):
     html = '%s.html' % widget_name
-    path = os.path.join('widgets', widget_name, html)
+    path = os.path.join(os.path.dirname(os.path.realpath(__file__)),'widgets', widget_name, html)
     if os.path.isfile(path):
         f = open(path)
         contents = f.read()
