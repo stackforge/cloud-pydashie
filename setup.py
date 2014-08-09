@@ -12,6 +12,7 @@ setup(
     name='PyDashie',
     version='0.1dev',
     packages=['pydashie',],
+    include_package_data=True,
     install_requires=[
         'Flask >= 0.10',
         'Coffeescript >= 1.0.8',
