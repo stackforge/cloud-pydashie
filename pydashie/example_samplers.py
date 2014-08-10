@@ -93,3 +93,26 @@ class UsageGaugeSampler(DashieSampler):
     def sample(self):
         return {'value': random.randint(0, 100), 'max': 100}
 
+from pyzabbix import ZabbixAPI
+
+class ZabbixSampler(DashieSampler):
+    def __init__(self, *args, **kwargs):
+        self.seedX = 0
+        self.items = collections.deque()
+        DashieSampler.__init__(self, *args, **kwargs)
+
+    def name(self):
+        return 'zabbix'
+
+    def sample(self):
+        zapi = ZabbixAPI("http://zabbix.tonyrogers.me/zabbix/")
+        zabbix.session.verify = False
+        zapi.login("Admin", "zabbix")
+        ret = zapi.item.get(output=['lastvalue'],filter={'host':'zabbix.tonyrogers.me'},search={'key_':'zabbix[wcache,values]'})
+
+        self.items.append({'x': self.seedX,
+                           'y': ret[0]['lastvalue']})
+        self.seedX += 1
+        if len(self.items) > 10:
+            self.items.popleft()
+        return {'points': list(self.items)}

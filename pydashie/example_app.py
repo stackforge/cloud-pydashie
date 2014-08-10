@@ -8,6 +8,7 @@ def run(app, xyzzy):
         ConvergenceSampler(xyzzy, 1),
         ProgressBarsSampler(xyzzy, 5),
         UsageGaugeSampler(xyzzy, 3),
+        ZabbixSampler(xyzzy,3)
     ]
 
     try:
