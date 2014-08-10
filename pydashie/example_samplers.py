@@ -106,7 +106,7 @@ class ZabbixSampler(DashieSampler):
 
     def sample(self):
         zapi = ZabbixAPI("http://zabbix.tonyrogers.me/zabbix/")
-        zabbix.session.verify = False
+        zapi.session.verify = False
         zapi.login("Admin", "zabbix")
         ret = zapi.item.get(output=['lastvalue'],filter={'host':'zabbix.tonyrogers.me'},search={'key_':'zabbix[wcache,values]'})
 
