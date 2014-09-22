@@ -6,7 +6,7 @@ from dashie_sampler import DashieSampler
 
 class SynergySampler(DashieSampler):
     def __init__(self, *args, **kwargs):
-        DashieSampler.__init__(self, *args, **kwargs)
+        super(SynergySampler, self).__init__(*args, **kwargs)
         self._last = 0
 
     def name(self):
@@ -22,7 +22,7 @@ class SynergySampler(DashieSampler):
 
 class HotnessSampler(DashieSampler):
     def __init__(self, *args, **kwargs):
-        DashieSampler.__init__(self, *args, **kwargs)
+        super(HotnessSampler, self).__init__(*args, **kwargs)
         self._last = 0
 
     def name(self):
@@ -60,7 +60,7 @@ class ConvergenceSampler(DashieSampler):
     def __init__(self, *args, **kwargs):
         self.seedX = 0
         self.items = collections.deque()
-        DashieSampler.__init__(self, *args, **kwargs)
+        super(ConvergenceSampler, self).__init__(*args, **kwargs)
 
     def sample(self):
         self.items.append({'x': self.seedX,
@@ -74,7 +74,7 @@ class ConvergenceSampler(DashieSampler):
 
 class ProgressBarsSampler(DashieSampler):
     def __init__(self, *args, **kwargs):
-        DashieSampler.__init__(self, *args, **kwargs)
+        super(ProgressBarsSampler, self).__init__(*args, **kwargs)
 
     def name(self):
         return 'progress_bars'
@@ -90,7 +90,7 @@ class ProgressBarsSampler(DashieSampler):
 
 class UsageGaugeSampler(DashieSampler):
     def __init__(self, *args, **kwargs):
-        DashieSampler.__init__(self, *args, **kwargs)
+        super(UsageGaugeSampler, self).__init__(*args, **kwargs)
 
     def name(self):
         return 'usage_gauge'

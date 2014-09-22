@@ -4,7 +4,7 @@ import json
 from repeated_timer import RepeatedTimer
 
 
-class DashieSampler:
+class DashieSampler(object):
     def __init__(self, app, interval):
         self._app = app
         self._timer = RepeatedTimer(interval, self._sample)

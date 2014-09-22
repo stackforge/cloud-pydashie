@@ -5,7 +5,7 @@ from pydashie.dashie_sampler import DashieSampler
 
 class WebsiteUpSampler(DashieSampler):
     def __init__(self, *args, **kwargs):
-        DashieSampler.__init__(self, *args, **kwargs)
+        super(WebsiteUpSampler, self).__init__(*args, **kwargs)
         self._last = 0
         self.page = 'http://www.google.com'
 

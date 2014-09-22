@@ -5,7 +5,7 @@ from pydashie.dashie_sampler import DashieSampler
 
 class TrelloSampler(DashieSampler):
     def __init__(self, *args, **kwargs):
-        DashieSampler.__init__(self, *args, **kwargs)
+        super(TrelloSampler, self).__init__(*args, **kwargs)
         self._last = 0
         self.key = '0667001bfafc26b53864fd08124159f0'
         self.secret = 'cb6a56444019998b879015c53a17f695700e6dd2f6f147870f27aff89e156c2b'
