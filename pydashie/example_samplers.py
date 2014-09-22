@@ -1,7 +1,8 @@
+import collections
+import random
+
 from dashie_sampler import DashieSampler
 
-import random
-import collections
 
 class SynergySampler(DashieSampler):
     def __init__(self, *args, **kwargs):
@@ -18,6 +19,7 @@ class SynergySampler(DashieSampler):
         self._last = s['current']
         return s
 
+
 class HotnessSampler(DashieSampler):
     def __init__(self, *args, **kwargs):
         DashieSampler.__init__(self, *args, **kwargs)
@@ -33,6 +35,7 @@ class HotnessSampler(DashieSampler):
         self._last = s['current']
         return s
 
+
 class BuzzwordsSampler(DashieSampler):
     def name(self):
         return 'buzzwords'
@@ -47,7 +50,8 @@ class BuzzwordsSampler(DashieSampler):
                                 'Skydancer']
         items = [{'label': pony_name, 'value': random.randint(0, 20)} for pony_name in my_little_pony_names]
         random.shuffle(items)
-        return {'items':items}
+        return {'items': items}
+
 
 class ConvergenceSampler(DashieSampler):
     def name(self):
@@ -60,26 +64,27 @@ class ConvergenceSampler(DashieSampler):
 
     def sample(self):
         self.items.append({'x': self.seedX,
-                           'y': random.randint(0,20)})
+                           'y': random.randint(0, 20)})
         self.seedX += 1
         if len(self.items) > 10:
             self.items.popleft()
+
         return {'points': list(self.items)}
 
 
 class ProgressBarsSampler(DashieSampler):
     def __init__(self, *args, **kwargs):
         DashieSampler.__init__(self, *args, **kwargs)
-    
+
     def name(self):
         return 'progress_bars'
 
     def sample(self):
         random_progress = []
-        
+
         for i in range(5):
             random_progress.append({'name': "Project %d" % i, 'progress': random.randint(0, 100)})
-    
+
         return {'title': "Progress Bars Title", 'progress_items': random_progress}
 
 

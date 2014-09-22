@@ -1,10 +1,18 @@
-from example_samplers import *
+from example_samplers import (
+    SynergySampler,
+    HotnessSampler,
+    BuzzwordsSampler,
+    ConvergenceSampler,
+    ProgressBarsSampler,
+    UsageGaugeSampler,
+)
+
 
 def run(app, xyzzy):
     samplers = [
         SynergySampler(xyzzy, 3),
         HotnessSampler(xyzzy, 3),
-        BuzzwordsSampler(xyzzy, 2), # 10
+        BuzzwordsSampler(xyzzy, 2),  # 10
         ConvergenceSampler(xyzzy, 1),
         ProgressBarsSampler(xyzzy, 5),
         UsageGaugeSampler(xyzzy, 3),
@@ -21,7 +29,7 @@ def run(app, xyzzy):
     finally:
         print "Disconnecting clients"
         xyzzy.stopped = True
-        
+
         print "Stopping %d timers" % len(samplers)
         for (i, sampler) in enumerate(samplers):
             sampler.stop()
