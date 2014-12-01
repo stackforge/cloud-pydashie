@@ -13,10 +13,13 @@ class SynergySampler(DashieSampler):
         return 'synergy'
 
     def sample(self):
-        s = {'value': random.randint(0, 100),
-             'current': random.randint(0, 100),
+        s = {'min': 0,
+             'max': 100,
+             'value': random.randint(0, 100),
              'last': self._last}
-        self._last = s['current']
+        s['moreinfo'] = "%s/%s" % (s['value'], s['max'])
+        s['current'] = s['value']
+        self._last = s['value']
         return s
 
 
