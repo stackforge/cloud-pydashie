@@ -1,0 +1,24 @@
+main:
+    log_file: pydashie.log
+openstack:
+    regions:        
+        - 'region1'
+    allocation:
+        region1:
+            vcpus_allocation_ratio: 2.0
+            ram_allocation_ratio: 1.0
+            # remove this amount per node available metric
+            reserved_ram_per_node: 0
+            reserved_vcpus_per_node: 0
+    auth:
+        auth_url: 'http://localhost:5000/v2.0'
+        username: 'admin'
+        password: 'openstack'
+        project_name: 'demo'
+        insecure: True
+nagios:
+    services:
+        region1:
+            statfile: './region1-status.dat'
+            host: 'region1-mon0'
+            username: 'admin'

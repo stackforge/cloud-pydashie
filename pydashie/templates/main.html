@@ -20,49 +20,36 @@
     <div id="container">
       <div class="gridster">
       <ul>
-        <li data-row="1" data-col="1" data-sizex="2" data-sizey="1">
--          <div data-id="welcome" data-view="Text" data-title="Hello" data-text="This is your shiny new (python powered) dashboard." data-moreinfo="Protip: You can drag the widgets around!"></div>
+        <li data-row="1" data-col="1" data-sizex="1" data-sizey="1">
+          <div data-id="clock" data-view="Clock" data-title="Clock"></div>
         </li>
 
-        <li data-row="1" data-col="3" data-sizex="1" data-sizey="1">
-          <div data-id="hotness" data-view="Hotness" data-title="Hotness" data-cool="40" data-warm="90"></div>
+        <li data-row="1" data-col="2" data-sizex="1" data-sizey="1">
+          <div data-id="nagios" data-view="Nagios" data-unordered="true" data-title="Icinga Prod" data-moreinfo="Unacknowledged events"></div>
         </li>
 
         <li data-row="1" data-col="4" data-sizex="1" data-sizey="1">
-          <div data-id="clock" data-view="Clock" data-title="Clock"></div>
-        </li> 
+          <div data-id="cpu" data-view="Meter" data-title="CPU"></div>
+        </li>
 
         <li data-row="1" data-col="5" data-sizex="1" data-sizey="1">
-          <div data-view="Image" data-image="/images/dashie.png"></div>
+          <div data-id="ram" data-view="Meter" data-title="RAM"></div>
         </li>
 
         <li data-row="2" data-col="2" data-sizex="2" data-sizey="1">
-          <div data-id="progress_bars" data-view="ProgressBars" data-title="Project Bars"></div>
+          <div data-id="cpu_regions" data-view="ProgressBars" data-title="CPU usage per region"></div>
         </li>
 
-        <li data-row="2" data-col="4" data-sizex="1" data-sizey="1">
-          <div data-id="synergy" data-view="Meter" data-title="Synergy"></div>
-        </li>
-
-        <li data-row="2" data-col="5" data-sizex="1" data-sizey="1">
-          <div data-id="synergy" data-view="Meter" data-title="Synergy"></div>
+        <li data-row="2" data-col="4" data-sizex="2" data-sizey="1">
+          <div data-id="ram_regions" data-view="ProgressBars" data-title="RAM usage per region"></div>
         </li>
 
         <li data-row="2" data-col="1" data-sizex="1" data-sizey="2">
           <div data-id="buzzwords" data-view="List" data-unordered="true" data-title="Buzzwords" data-moreinfo="Absolute ranking of pony preferences"></div>
         </li>       
 
-        <li data-row="3" data-col="2" data-sizex="2" data-sizey="1">
+        <li data-row="4" data-col="2" data-sizex="2" data-sizey="1">
           <div data-id="convergence" data-view="Graph" data-title="Convergence" style="background-color:#ff9618"></div>
-        </li>
-
-        <li data-row="3" data-col="4" data-sizex="1" data-sizey="1">
-          <div data-id="website_up" data-view="Text" data-title="Website"></div>
-        </li>
-        
-        <li data-row="3" data-col="5" data-sizex="1" data-sizey="1">
-            <!-- <style scoped>.memcached_used_memory .gauge { height: 145px;}</style> -->
-            <div data-id="usage_gauge" data-view="UsageGauge" style="background-color: #3e3735"  data-title="Power !!"></div>
         </li>
 
       </ul>

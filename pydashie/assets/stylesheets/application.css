@@ -49,7 +49,8 @@
                 .widget.widget-progress-bars .outer-progress-bar .inner-progress-bar {
                   background-color: #2391ab;
                   border-radius: 0.35em;
-                  color: #ffffff; }
+                  color: #ffffff;
+                  white-space: pre; }
   .widget.widget-progress-bars .zebra-stripe {
     background-color: #57c3dd; }
 
@@ -88,16 +89,10 @@
           background-color: #FF003C; }
 
 .widget-image {
-  background-color: #4b4b4b; }
-
-.widget-image {
   background-color: #FFFFFF; }
 
 .widget-clock {
   background-color: #666666; }
-
-.widget-clock {
-  background-color: #dc5945; }
 
 .widget-meter {
   background-color: #9c4274; }
@@ -110,6 +105,39 @@
         color: rgba(255, 255, 255, 0.3); }
         .widget-meter .updated-at {
           color: rgba(0, 0, 0, 0.3); }
+
+.widget-nagios li {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding-top: 25px; }
+  .widget-nagios li h3 {
+    font-size: 60px;
+    font-weight: bold; }
+    .widget-nagios li h4 {
+      font-size: 20px;
+      font-weight: bold;
+      text-transform: uppercase; }
+      p .widget-nagios li.updated-at {
+        font-size: 10px; }
+        .widget-nagios li.green {
+          background-color: #86d751; }
+          .widget-nagios li.green p.updated-at {
+            color: #c0eaa4; }
+  .widget-nagios li.yellow {
+    background-color: #edde43; }
+    .widget-nagios li.yellow p.updated-at {
+      color: #f6eea0; }
+  .widget-nagios li.red {
+    background-color: #e3394f; }
+    .widget-nagios li.red p.updated-at {
+      color: #f0929e; }
+  .widget-nagios li.error {
+    background-color: #f75f00; }
+    .widget-nagios li.error p.updated-at {
+      color: #ff9c5e; }
 
 .widget-usage-gauge {
   background-color: #ec223f; }
