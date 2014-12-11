@@ -1,6 +1,9 @@
+import argparse
 import logging
 import os
+import sys
 import Queue
+import yaml
 
 from flask import (
     current_app,
@@ -12,8 +15,9 @@ from flask import (
 )
 
 app = Flask(__name__)
-logging.basicConfig()
-log = logging.getLogger(__name__)
+
+# we setup the log in __main__
+log = None
 
 
 @app.route("/")
@@ -53,6 +57,7 @@ def javascripts():
             'widgets/hotness/hotness.coffee',
             'widgets/progress_bars/progress_bars.coffee',
             'widgets/usage_gauge/usage_gauge.coffee',
+            'widgets/nagios/nagios.coffee',
         ]
         nizzle = True
         if not nizzle:
@@ -173,10 +178,35 @@ def close_stream(*args, **kwargs):
 
 
 def run_sample_app():
+    a = argparse.ArgumentParser("Openstack-PyDashboard")
+
+    a.add_argument("-c", "--config", dest="config", help="Path to config file",
+                   required=True)
+    a.add_argument("-i", "--interface", dest="ip",
+                   help="IP address to serve on.", default="0.0.0.0")
+    a.add_argument("-p", "--port", help="port to serve on", default="6000")
+
+    args = a.parse_args()
+
+    conf = None
+
+    try:
+        with open(args.config) as f:
+            conf = yaml.load(f)
+    except IOError as e:
+        print "Couldn't load config file: %s" % e
+        sys.exit(1)
+
+    logging.basicConfig(filename=conf['main']['log_file'],
+                        level=logging.INFO,
+                        format='%(asctime)s %(message)s')
+    global log
+    log = logging.getLogger(__name__)
+
     import SocketServer
     SocketServer.BaseServer.handle_error = close_stream
     import example_app
-    example_app.run(app, xyzzy)
+    example_app.run(args, conf, app, xyzzy)
 
 
 if __name__ == "__main__":

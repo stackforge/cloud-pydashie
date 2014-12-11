@@ -1,27 +1,31 @@
 from example_samplers import (
-    SynergySampler,
-    HotnessSampler,
+    CPUSampler,
+    RAMSampler,
+    RegionsRAMSampler,
+    RegionsCPUSampler,
+    NagiosSampler,
     BuzzwordsSampler,
     ConvergenceSampler,
-    ProgressBarsSampler,
     UsageGaugeSampler,
 )
 
 
-def run(app, xyzzy):
+def run(args, conf, app, xyzzy):
+
     samplers = [
-        SynergySampler(xyzzy, 3),
-        HotnessSampler(xyzzy, 3),
-        BuzzwordsSampler(xyzzy, 2),  # 10
-        ConvergenceSampler(xyzzy, 1),
-        ProgressBarsSampler(xyzzy, 5),
-        UsageGaugeSampler(xyzzy, 3),
+        CPUSampler(xyzzy, 10, conf['openstack']),
+        RAMSampler(xyzzy, 10, conf['openstack']),
+        RegionsCPUSampler(xyzzy, 10, conf['openstack']),
+        RegionsRAMSampler(xyzzy, 10, conf['openstack']),
+        NagiosSampler(xyzzy, 10, conf['nagios']),
+        # BuzzwordsSampler(xyzzy, 2),
+        # ConvergenceSampler(xyzzy, 1),
     ]
 
     try:
         app.run(debug=True,
-                host='0.0.0.0',
-                port=5000,
+                host=args.ip,
+                port=args.port,
                 threaded=True,
                 use_reloader=False,
                 use_debugger=True

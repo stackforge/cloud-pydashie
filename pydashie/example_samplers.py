@@ -1,21 +1,39 @@
 import collections
 import random
+import nagios
 
 from dashie_sampler import DashieSampler
 
 
-class SynergySampler(DashieSampler):
+class CPUSampler(DashieSampler):
     def __init__(self, *args, **kwargs):
-        super(SynergySampler, self).__init__(*args, **kwargs)
+        super(CPUSampler, self).__init__(*args, **kwargs)
         self._last = 0
 
     def name(self):
-        return 'synergy'
+        return 'cpu'
 
     def sample(self):
+        max_cpu = 0
+        cur_cpu = 0
+
+        for region in self._conf['regions']:
+            nova = self._client('compute', region)
+            stats = nova.hypervisors.statistics()
+            hypervisors = nova.hypervisors.list()
+
+            reserved = 0
+            for hypervisor in hypervisors:
+                reserved = reserved + self._conf['allocation'][region]['reserved_vcpus_per_node']
+
+            cpu_ratio = self._conf['allocation'][region]['vcpus_allocation_ratio']
+
+            max_cpu = max_cpu + (stats.vcpus * cpu_ratio) - reserved
+            cur_cpu = cur_cpu + stats.vcpus_used
+
         s = {'min': 0,
-             'max': 100,
-             'value': random.randint(0, 100),
+             'max': max_cpu,
+             'value': cur_cpu,
              'last': self._last}
         s['moreinfo'] = "%s/%s" % (s['value'], s['max'])
         s['current'] = s['value']
@@ -23,19 +41,143 @@ class SynergySampler(DashieSampler):
         return s
 
 
-class HotnessSampler(DashieSampler):
+class RAMSampler(DashieSampler):
     def __init__(self, *args, **kwargs):
-        super(HotnessSampler, self).__init__(*args, **kwargs)
+        super(RAMSampler, self).__init__(*args, **kwargs)
         self._last = 0
 
     def name(self):
-        return 'hotness'
+        return 'ram'
 
     def sample(self):
-        s = {'value': random.randint(0, 100),
-             'current': random.randint(0, 100),
+        max_ram = 0
+        cur_ram = 0
+
+        for region in self._conf['regions']:
+            nova = self._client('compute', region)
+            stats = nova.hypervisors.statistics()
+            hypervisors = nova.hypervisors.list()
+
+            reserved = 0
+            for hypervisor in hypervisors:
+                reserved = reserved + self._conf['allocation'][region]['reserved_ram_per_node']
+
+            ram_ratio = self._conf['allocation'][region]['ram_allocation_ratio']
+
+            max_ram = max_ram + (stats.memory_mb * ram_ratio * 1024 * 1024) - reserved
+            cur_ram = cur_ram + stats.memory_mb_used * 1024 * 1024
+
+        ram_converted = self._convert(max_ram)
+        ram_converted_used = self._convert(cur_ram)
+
+        s = {'min': 0,
+             'max': ram_converted[0],
+             'value': ram_converted_used[0],
              'last': self._last}
-        self._last = s['current']
+        s['moreinfo'] = "%s%s out of %s%s" % (ram_converted_used[0],
+                                              ram_converted_used[1],
+                                              ram_converted[0],
+                                              ram_converted[1])
+        s['current'] = s['value']
+        self._last = s['value']
+        return s
+
+
+class RegionsCPUSampler(DashieSampler):
+    def __init__(self, *args, **kwargs):
+        super(RegionsCPUSampler, self).__init__(*args, **kwargs)
+
+    def name(self):
+        return 'cpu_regions'
+
+    def sample(self):
+        regions = []
+
+        for region in self._conf['regions']:
+            nova = self._client('compute', region)
+            stats = nova.hypervisors.statistics()
+            hypervisors = nova.hypervisors.list()
+
+            reserved = 0
+            for hypervisor in hypervisors:
+                reserved = reserved + self._conf['allocation'][region]['reserved_vcpus_per_node']
+
+            cpu_ratio = self._conf['allocation'][region]['vcpus_allocation_ratio']
+
+            max_cpu = (stats.vcpus * cpu_ratio) - reserved
+            cur_cpu = stats.vcpus_used
+
+            regions.append({'name': region, 'progress': (cur_cpu * 100.0) / max_cpu,
+                            'max': max_cpu, 'value': cur_cpu})
+
+        return {'progress_items': regions}
+
+
+class RegionsRAMSampler(DashieSampler):
+    def __init__(self, *args, **kwargs):
+        super(RegionsRAMSampler, self).__init__(*args, **kwargs)
+
+    def name(self):
+        return 'ram_regions'
+
+    def sample(self):
+        regions = []
+
+        for region in self._conf['regions']:
+            nova = self._client('compute', region)
+            stats = nova.hypervisors.statistics()
+            hypervisors = nova.hypervisors.list()
+
+            reserved = 0
+            for hypervisor in hypervisors:
+                reserved = reserved + self._conf['allocation'][region]['reserved_ram_per_node']
+
+            ram_ratio = self._conf['allocation'][region]['ram_allocation_ratio']
+
+            max_ram = (stats.memory_mb * ram_ratio * 1024 * 1024) - reserved
+            cur_ram = stats.memory_mb_used * 1024 * 1024
+
+            ram_converted = self._convert(max_ram)[0]
+            ram_converted_used = self._convert(cur_ram)[0]
+
+            regions.append({'name': region,
+                            'progress': ((ram_converted_used * 100.0) /
+                                         ram_converted),
+                            'max': ram_converted, 'value': ram_converted_used})
+
+        return {'progress_items': regions}
+
+
+class NagiosSampler(DashieSampler):
+    def __init__(self, *args, **kwargs):
+        super(NagiosSampler, self).__init__(*args, **kwargs)
+        self._last = 0
+
+    def name(self):
+        return 'nagios'
+
+    def sample(self):
+
+        nagios.get_statusfiles(self._conf['services'])
+        servicestatus = nagios.parse_status(self._conf['services'])
+
+        criticals = 0
+        warnings = 0
+
+        for region in servicestatus:
+            criticals = criticals + servicestatus[region]['critical']
+            warnings = warnings + servicestatus[region]['warning']
+
+        status = 'green'
+
+        if criticals > 0:
+            status = 'red'
+        elif warnings > 0:
+            status = 'yellow'
+
+        s = {'criticals': criticals,
+             'warnings': warnings,
+             'status': status}
         return s
 
 
@@ -73,22 +215,6 @@ class ConvergenceSampler(DashieSampler):
             self.items.popleft()
 
         return {'points': list(self.items)}
-
-
-class ProgressBarsSampler(DashieSampler):
-    def __init__(self, *args, **kwargs):
-        super(ProgressBarsSampler, self).__init__(*args, **kwargs)
-
-    def name(self):
-        return 'progress_bars'
-
-    def sample(self):
-        random_progress = []
-
-        for i in range(5):
-            random_progress.append({'name': "Project %d" % i, 'progress': random.randint(0, 100)})
-
-        return {'title': "Progress Bars Title", 'progress_items': random_progress}
 
 
 class UsageGaugeSampler(DashieSampler):
