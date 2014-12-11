@@ -7,14 +7,14 @@
 // this to reflect your personal needs.
 $row-size: 0.7em;
  
-$blue: #2db4d4;
+$blue: #30A2BD;
 $white: #ffffff;
 $base-color: $blue;
  
 $base-color-dark: darken($base-color, 10%);
 $base-color-light: lighten($base-color, 10%);
 $base-color-lighter: lighten($base-color, 25%);
-$base-color-lightest: lighten($base-color, 35%);
+$base-color-lightest: lighten($base-color, 45%);
  
 $text-color:       $base-color-lightest;
  
@@ -88,6 +88,7 @@ $text-color:       $base-color-lightest;
       border-radius: $row-size / 2;
       color: $white;
       white-space: pre;
+      font-size: 1em;
     }
   }
  

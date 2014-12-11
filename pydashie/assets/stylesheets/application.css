@@ -3,19 +3,19 @@
   width: 100%;
   padding: 5px;
   position: relative;
-  background-color: #2db4d4;
+  background-color: #30A2BD;
   vertical-align: baseline; }
   .widget.widget-progress-bars * {
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box; }
     .widget.widget-progress-bars .title {
-      color: #c1e9f2;
+      color: #dcf1f6;
       margin-bottom: 5px; }
       .widget.widget-progress-bars .rows-container {
         height: 85%;
         width: 100%;
-        color: #c1e9f2;
+        color: #dcf1f6;
         font-size: 0.7em;
         text-align: center; }
         .widget.widget-progress-bars .row {
@@ -43,16 +43,17 @@
                 display: inline-block;
                 width: 65%;
                 vertical-align: middle;
-                border: 0.23333em solid #2391ab;
+                border: 0.23333em solid #267f94;
                 border-radius: 1.4em;
-                background-color: #97daea; }
+                background-color: #8bd1e2; }
                 .widget.widget-progress-bars .outer-progress-bar .inner-progress-bar {
-                  background-color: #2391ab;
+                  background-color: #267f94;
                   border-radius: 0.35em;
                   color: #ffffff;
-                  white-space: pre; }
+                  white-space: pre;
+                  font-size: 1em; }
   .widget.widget-progress-bars .zebra-stripe {
-    background-color: #57c3dd; }
+    background-color: #4eb9d2; }
 
 .widget-iframe {
   padding: 3px 0px 0px 0px !important; }
