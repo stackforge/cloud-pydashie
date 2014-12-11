@@ -5,18 +5,18 @@
 // row-size is a magic number used for scaling. It will make things bigger
 // or smaller but always in proportion with each other. Feel free to change
 // this to reflect your personal needs.
-$row-size: 0.7em;
+$row-size: 1em;
  
 $blue: #30A2BD;
 $white: #ffffff;
-$base-color: $blue;
+$base-color: darken($blue, 20%);
  
 $base-color-dark: darken($base-color, 10%);
 $base-color-light: lighten($base-color, 10%);
 $base-color-lighter: lighten($base-color, 25%);
 $base-color-lightest: lighten($base-color, 45%);
  
-$text-color:       $base-color-lightest;
+$text-color:       $white;
  
 // ----------------------------------------------------------------------------
 // Widget-project-completion styles
@@ -88,7 +88,6 @@ $text-color:       $base-color-lightest;
       border-radius: $row-size / 2;
       color: $white;
       white-space: pre;
-      font-size: 1em;
     }
   }
  

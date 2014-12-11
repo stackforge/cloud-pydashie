@@ -4,9 +4,8 @@ from example_samplers import (
     RegionsRAMSampler,
     RegionsCPUSampler,
     NagiosSampler,
-    BuzzwordsSampler,
-    ConvergenceSampler,
-    UsageGaugeSampler,
+    # BuzzwordsSampler,
+    # ConvergenceSampler,
 )
 
 
