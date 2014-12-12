@@ -35,7 +35,7 @@ class CPUSampler(DashieSampler):
              'max': max_cpu,
              'value': cur_cpu,
              'last': self._last}
-        s['moreinfo'] = "%s/%s" % (s['value'], s['max'])
+        s['moreinfo'] = "%s out of %s" % (s['value'], s['max'])
         s['current'] = s['value']
         self._last = s['value']
         return s
@@ -78,6 +78,44 @@ class RAMSampler(DashieSampler):
                                               ram_converted_used[1],
                                               ram_converted[0],
                                               ram_converted[1])
+        s['current'] = s['value']
+        self._last = s['value']
+        return s
+
+
+class IPSampler(DashieSampler):
+    def __init__(self, *args, **kwargs):
+        super(IPSampler, self).__init__(*args, **kwargs)
+        self._last = 0
+
+    def name(self):
+        return 'ips'
+
+    def sample(self):
+        max_ips = 0
+        cur_ips = 0
+
+        for region in self._conf['regions']:
+            max_ips = (max_ips +
+                       self._conf['allocation'][region]['total_floating_ips'])
+
+            neutron = self._client('network', region)
+
+            ips = neutron.list_floatingips()
+            routers = neutron.list_routers()
+
+            net_gateways = 0
+            for router in routers['routers']:
+                if router['external_gateway_info'] is not None:
+                    net_gateways = net_gateways + 1
+
+            cur_ips = cur_ips + len(ips['floatingips']) + net_gateways
+
+        s = {'min': 0,
+             'max': max_ips,
+             'value': cur_ips,
+             'last': self._last}
+        s['moreinfo'] = "%s out of %s" % (cur_ips, max_ips)
         s['current'] = s['value']
         self._last = s['value']
         return s
@@ -144,6 +182,39 @@ class RegionsRAMSampler(DashieSampler):
                             'progress': ((ram_converted_used * 100.0) /
                                          ram_converted),
                             'max': ram_converted, 'value': ram_converted_used})
+
+        return {'progress_items': regions}
+
+
+class RegionIPSampler(DashieSampler):
+    def __init__(self, *args, **kwargs):
+        super(RegionIPSampler, self).__init__(*args, **kwargs)
+        self._last = 0
+
+    def name(self):
+        return 'ips_regions'
+
+    def sample(self):
+        regions = []
+
+        for region in self._conf['regions']:
+            neutron = self._client('network', region)
+
+            ips = neutron.list_floatingips()
+            routers = neutron.list_routers()
+
+            net_gateways = 0
+            for router in routers['routers']:
+                if router['external_gateway_info'] is not None:
+                    net_gateways = net_gateways + 1
+
+            cur_ips = len(ips['floatingips']) + net_gateways
+            max_ips = self._conf['allocation'][region]['total_floating_ips']
+
+            regions.append({'name': region,
+                            'progress': ((cur_ips * 100.0) /
+                                         max_ips),
+                            'max': max_ips, 'value': cur_ips})
 
         return {'progress_items': regions}
 

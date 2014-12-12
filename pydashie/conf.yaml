@@ -10,6 +10,7 @@ openstack:
             # remove this amount per node available metric
             reserved_ram_per_node: 0
             reserved_vcpus_per_node: 0
+            total_floating_ips: 256
     auth:
         auth_url: 'http://localhost:5000/v2.0'
         username: 'admin'

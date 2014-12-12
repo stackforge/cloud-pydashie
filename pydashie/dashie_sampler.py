@@ -7,6 +7,7 @@ from repeated_timer import RepeatedTimer
 from novaclient.v1_1 import client as novaclient
 from cinderclient.v1 import client as cinderclient
 from keystoneclient.v2_0 import client as keystoneclient
+from neutronclient.v2_0 import client as neutronclient
 
 
 class DashieSampler(object):
@@ -66,6 +67,15 @@ class DashieSampler(object):
                     self._conf['auth']['password'],
                     self._conf['auth']['project_name'],
                     self._conf['auth']['auth_url'],
+                    region_name=region,
+                    insecure=self._conf['auth']['insecure'])
+                self._os_clients[region][service] = client
+            elif service == 'network':
+                client = neutronclient.Client(
+                    username=self._conf['auth']['username'],
+                    password=self._conf['auth']['password'],
+                    tenant_name=self._conf['auth']['project_name'],
+                    auth_url=self._conf['auth']['auth_url'],
                     region_name=region,
                     insecure=self._conf['auth']['insecure'])
                 self._os_clients[region][service] = client
