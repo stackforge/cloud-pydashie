@@ -14,16 +14,18 @@ from example_samplers import (
 
 def run(args, conf, app, xyzzy):
 
+    client_cache = {}
+
     samplers = [
-        CPUSampler(xyzzy, 60, conf['openstack']),
-        RAMSampler(xyzzy, 60, conf['openstack']),
-        IPSampler(xyzzy, 60, conf['openstack']),
-        RegionsCPUSampler(xyzzy, 60, conf['openstack']),
-        RegionsRAMSampler(xyzzy, 60, conf['openstack']),
-        RegionIPSampler(xyzzy, 60, conf['openstack']),
+        CPUSampler(xyzzy, 60, conf['openstack'], client_cache),
+        RAMSampler(xyzzy, 60, conf['openstack'], client_cache),
+        IPSampler(xyzzy, 60, conf['openstack'], client_cache),
+        RegionsCPUSampler(xyzzy, 60, conf['openstack'], client_cache),
+        RegionsRAMSampler(xyzzy, 60, conf['openstack'], client_cache),
+        RegionIPSampler(xyzzy, 60, conf['openstack'], client_cache),
         NagiosSampler(xyzzy, 15, conf['nagios']),
         NagiosRegionSampler(xyzzy, 15, conf['nagios']),
-        ResourceSampler(xyzzy, 60, conf['openstack']),
+        ResourceSampler(xyzzy, 60, conf['openstack'], client_cache),
         # ConvergenceSampler(xyzzy, 1),
     ]
 

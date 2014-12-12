@@ -11,9 +11,9 @@ from neutronclient.v2_0 import client as neutronclient
 
 
 class DashieSampler(object):
-    def __init__(self, app, interval, conf=None):
+    def __init__(self, app, interval, conf=None, client_cache={}):
         self._app = app
-        self._os_clients = {}
+        self._os_clients = client_cache
         self._conf = conf
         self._timer = RepeatedTimer(interval, self._sample)
 
@@ -57,6 +57,7 @@ class DashieSampler(object):
             return num, 'B'
 
     def _client(self, service, region):
+
         if not self._os_clients.get(region):
             self._os_clients[region] = {}
 

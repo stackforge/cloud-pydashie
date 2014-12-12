@@ -297,7 +297,7 @@ class ResourceSampler(DashieSampler):
         for region in self._conf['regions']:
             neutron = self._client('network', region)
             nova = self._client('compute', region)
-            cinder = self._client('storage', region)
+            # cinder = self._client('storage', region)
 
             stats = nova.hypervisors.statistics()
             resources['instances'] = resources['instances'] + stats.running_vms
@@ -312,7 +312,7 @@ class ResourceSampler(DashieSampler):
 
             vpns = neutron.list_vpnservices()
             resources['vpns'] = (resources['vpns'] +
-                                     len(vpns['vpnservices']))
+                                 len(vpns['vpnservices']))
 
             # volumes = cinder.volumes.list(search_opts={'all_tenants': 1})
             # resources['volumes'] = (resources['volumes'] +
