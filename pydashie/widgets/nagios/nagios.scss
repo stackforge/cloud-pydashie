@@ -25,48 +25,27 @@ $error: #f75f00;
       text-transform: uppercase;
     }
 
-    p &.updated-at {
-      font-size: 10px;
+    p {
+        &.updated-at {
+          color: rgba(0, 0, 0, 0.6);
+          font-size: 0.8em;
+        }
     }
   
     &.green {
       background-color: $success;
-
-      p {
-        &.updated-at {
-          color: lighten($success, 20%);
-        }
-      }
     }
 
     &.yellow {
       background-color: $warning;
-
-      p {
-        &.updated-at {
-          color: lighten($warning, 20%);
-        }
-      }
     }
 
     &.red {
       background-color: $failure;
-
-      p {
-        &.updated-at {
-          color: lighten($failure, 20%);
-        }
-      }
     }
 
     &.error {
       background-color: $error;
-
-      p {
-        &.updated-at {
-          color: lighten($error, 20%);
-        }
-      }
     }
   }
 }

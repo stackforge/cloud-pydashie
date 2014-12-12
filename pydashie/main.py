@@ -58,6 +58,7 @@ def javascripts():
             'widgets/progress_bars/progress_bars.coffee',
             'widgets/usage_gauge/usage_gauge.coffee',
             'widgets/nagios/nagios.coffee',
+            'widgets/nagios_list/nagios_list.coffee',
         ]
         nizzle = True
         if not nizzle:

@@ -181,21 +181,24 @@ class NagiosSampler(DashieSampler):
         return s
 
 
-class BuzzwordsSampler(DashieSampler):
+class NagiosRegionSampler(DashieSampler):
     def name(self):
-        return 'buzzwords'
+        return 'nagios_regions'
 
     def sample(self):
-        my_little_pony_names = ['Rainbow Dash',
-                                'Blossomforth',
-                                'Derpy',
-                                'Fluttershy',
-                                'Lofty',
-                                'Scootaloo',
-                                'Skydancer']
-        items = [{'label': pony_name, 'value': random.randint(0, 20)} for pony_name in my_little_pony_names]
-        random.shuffle(items)
-        return {'items': items}
+        nagios.get_statusfiles(self._conf['services'])
+        servicestatus = nagios.parse_status(self._conf['services'])
+
+        criticals = []
+        warnings = []
+
+        for region in servicestatus:
+            criticals.append({'label': region,
+                              'value': servicestatus[region]['critical']})
+            warnings.append({'label': region,
+                             'value': servicestatus[region]['warning']})
+
+        return {'criticals': criticals, 'warnings': warnings}
 
 
 class ConvergenceSampler(DashieSampler):

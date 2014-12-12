@@ -4,7 +4,7 @@ from example_samplers import (
     RegionsRAMSampler,
     RegionsCPUSampler,
     NagiosSampler,
-    # BuzzwordsSampler,
+    NagiosRegionSampler,
     # ConvergenceSampler,
 )
 
@@ -12,12 +12,12 @@ from example_samplers import (
 def run(args, conf, app, xyzzy):
 
     samplers = [
-        CPUSampler(xyzzy, 10, conf['openstack']),
-        RAMSampler(xyzzy, 10, conf['openstack']),
-        RegionsCPUSampler(xyzzy, 10, conf['openstack']),
-        RegionsRAMSampler(xyzzy, 10, conf['openstack']),
-        NagiosSampler(xyzzy, 10, conf['nagios']),
-        # BuzzwordsSampler(xyzzy, 2),
+        CPUSampler(xyzzy, 60, conf['openstack']),
+        RAMSampler(xyzzy, 60, conf['openstack']),
+        RegionsCPUSampler(xyzzy, 60, conf['openstack']),
+        RegionsRAMSampler(xyzzy, 60, conf['openstack']),
+        NagiosSampler(xyzzy, 5, conf['nagios']),
+        NagiosRegionSampler(xyzzy, 5, conf['nagios']),
         # ConvergenceSampler(xyzzy, 1),
     ]
 

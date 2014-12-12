@@ -122,24 +122,17 @@
       font-size: 20px;
       font-weight: bold;
       text-transform: uppercase; }
-      p .widget-nagios li.updated-at {
-        font-size: 10px; }
-        .widget-nagios li.green {
-          background-color: #86d751; }
-          .widget-nagios li.green p.updated-at {
-            color: #c0eaa4; }
-  .widget-nagios li.yellow {
-    background-color: #edde43; }
-    .widget-nagios li.yellow p.updated-at {
-      color: #f6eea0; }
-  .widget-nagios li.red {
-    background-color: #e3394f; }
-    .widget-nagios li.red p.updated-at {
-      color: #f0929e; }
-  .widget-nagios li.error {
-    background-color: #f75f00; }
-    .widget-nagios li.error p.updated-at {
-      color: #ff9c5e; }
+      .widget-nagios li p.updated-at {
+        color: rgba(0, 0, 0, 0.6);
+        font-size: 0.8em; }
+  .widget-nagios li.green {
+    background-color: #86d751; }
+    .widget-nagios li.yellow {
+      background-color: #edde43; }
+      .widget-nagios li.red {
+        background-color: #e3394f; }
+        .widget-nagios li.error {
+          background-color: #f75f00; }
 
 .widget-usage-gauge {
   background-color: #ec223f; }
@@ -267,6 +260,38 @@
           color: rgba(255, 255, 255, 0.7); }
           .widget-number .updated-at {
             color: rgba(0, 0, 0, 0.3); }
+
+.widget-nagios-list {
+  background-color: #5B7F97;
+  vertical-align: top; }
+  .widget-nagios-list .title {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1em; }
+    .widget-nagios-list .subtitle {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.8em; }
+      .widget-nagios-list ol, .widget-nagios-list ul {
+        margin: 0 15px;
+        text-align: left;
+        color: rgba(255, 255, 255, 0.7); }
+        .widget-nagios-list ol {
+          nagios-list-style-position: inside; }
+          .widget-nagios-list li {
+            margin-bottom: 5px; }
+            .widget-nagios-list .nagios-list-nostyle {
+              nagios-list-style: none; }
+              .widget-nagios-list .label {
+                color: rgba(255, 255, 255, 0.7); }
+                .widget-nagios-list .value {
+                  float: right;
+                  margin-left: 12px;
+                  font-weight: 600;
+                  color: #fff; }
+                  .widget-nagios-list .updated-at {
+                    color: rgba(0, 0, 0, 0.6);
+                    font-size: 0.8em; }
+                    .widget-nagios-list .more-info {
+                      color: rgba(255, 255, 255, 0.7); }
 
 @-webkit-keyframes status-warning-background {
   0% {
