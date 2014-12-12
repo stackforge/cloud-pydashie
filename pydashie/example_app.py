@@ -7,6 +7,7 @@ from example_samplers import (
     RegionIPSampler,
     NagiosSampler,
     NagiosRegionSampler,
+    ResourceSampler,
     # ConvergenceSampler,
 )
 
@@ -22,6 +23,7 @@ def run(args, conf, app, xyzzy):
         RegionIPSampler(xyzzy, 60, conf['openstack']),
         NagiosSampler(xyzzy, 15, conf['nagios']),
         NagiosRegionSampler(xyzzy, 15, conf['nagios']),
+        ResourceSampler(xyzzy, 60, conf['openstack']),
         # ConvergenceSampler(xyzzy, 1),
     ]
 

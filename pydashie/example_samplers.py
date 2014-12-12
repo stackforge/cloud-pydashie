@@ -282,6 +282,49 @@ class NagiosRegionSampler(DashieSampler):
         return {'criticals': criticals, 'warnings': warnings}
 
 
+class ResourceSampler(DashieSampler):
+    def name(self):
+        return 'resources'
+
+    def sample(self):
+        resources = {'instances': 0,
+                     'routers': 0,
+                     'networks': 0,
+                     # 'volumes': 0,
+                     # 'images': 0,
+                     'vpns': 0}
+
+        for region in self._conf['regions']:
+            neutron = self._client('network', region)
+            nova = self._client('compute', region)
+            cinder = self._client('storage', region)
+
+            stats = nova.hypervisors.statistics()
+            resources['instances'] = resources['instances'] + stats.running_vms
+
+            routers = neutron.list_routers()
+            resources['routers'] = (resources['routers'] +
+                                    len(routers['routers']))
+
+            networks = neutron.list_networks()
+            resources['networks'] = (resources['networks'] +
+                                     len(networks['networks']))
+
+            vpns = neutron.list_vpnservices()
+            resources['vpns'] = (resources['vpns'] +
+                                     len(vpns['vpnservices']))
+
+            # volumes = cinder.volumes.list(search_opts={'all_tenants': 1})
+            # resources['volumes'] = (resources['volumes'] +
+            #                         len(volumes))
+
+        items = []
+        for key, value in resources.iteritems():
+            items.append({'label': key, 'value': value})
+
+        return {'items': items}
+
+
 class ConvergenceSampler(DashieSampler):
     def name(self):
         return 'convergence'
