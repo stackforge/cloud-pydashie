@@ -4,8 +4,8 @@
 $background-color:  #5B7F97;
 $value-color:       #fff;
 
-$title-color:       rgba(255, 255, 255, 0.7);
-$label-color:       rgba(255, 255, 255, 0.7);
+$title-color:       rgba(255, 255, 255, 1);
+$label-color:       rgba(255, 255, 255, 1);
 $moreinfo-color:    rgba(255, 255, 255, 0.7);
 
 // ----------------------------------------------------------------------------
@@ -18,12 +18,12 @@ $moreinfo-color:    rgba(255, 255, 255, 0.7);
 
   .title { 
     color: $title-color;
-    font-size: 1em;
+    font-size: 1.2em;
   }
 
   .subtitle { 
     color: $title-color;
-    font-size: 0.8em;
+    font-size: 1em;
   }
 
   ol, ul {
@@ -37,7 +37,7 @@ $moreinfo-color:    rgba(255, 255, 255, 0.7);
   }
 
   li {
-    margin-bottom: 5px;
+    font-size: 1.1em;
   }
 
   .nagios-list-nostyle {
@@ -46,11 +46,12 @@ $moreinfo-color:    rgba(255, 255, 255, 0.7);
 
   .label {
     color: $label-color;    
+    font-weight: 600;   
   }
 
   .value {
     float: right;
-    margin-left: 12px;
+    margin-left: 10px;
     font-weight: 600;
     color: $value-color;
   }

@@ -198,6 +198,16 @@ class NagiosRegionSampler(DashieSampler):
             warnings.append({'label': region,
                              'value': servicestatus[region]['warning']})
 
+        # (adriant) the following is for easy testing:
+        # regions = ['region1', 'region2', 'region3']
+        
+        # criticals = []
+        # warnings = []
+
+        # for region in regions:
+        #     criticals.append({'label': region, 'value': random.randint(0, 5)})
+        #     warnings.append({'label': region, 'value': random.randint(0, 5)})
+
         return {'criticals': criticals, 'warnings': warnings}
 
 

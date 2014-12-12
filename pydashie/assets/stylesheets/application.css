@@ -265,26 +265,27 @@
   background-color: #5B7F97;
   vertical-align: top; }
   .widget-nagios-list .title {
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 1em; }
+    color: white;
+    font-size: 1.2em; }
     .widget-nagios-list .subtitle {
-      color: rgba(255, 255, 255, 0.7);
-      font-size: 0.8em; }
+      color: white;
+      font-size: 1em; }
       .widget-nagios-list ol, .widget-nagios-list ul {
         margin: 0 15px;
         text-align: left;
-        color: rgba(255, 255, 255, 0.7); }
+        color: white; }
         .widget-nagios-list ol {
           nagios-list-style-position: inside; }
           .widget-nagios-list li {
-            margin-bottom: 5px; }
+            font-size: 1.1em; }
             .widget-nagios-list .nagios-list-nostyle {
               nagios-list-style: none; }
               .widget-nagios-list .label {
-                color: rgba(255, 255, 255, 0.7); }
+                color: white;
+                font-weight: 600; }
                 .widget-nagios-list .value {
                   float: right;
-                  margin-left: 12px;
+                  margin-left: 10px;
                   font-weight: 600;
                   color: #fff; }
                   .widget-nagios-list .updated-at {
