@@ -183,7 +183,7 @@ def run_sample_app():
 
     a.add_argument("-c", "--config", dest="config", help="Path to config file",
                    required=True)
-    a.add_argument("-i", "--interface", dest="ip",
+    a.add_argument("-ip", "--interface", dest="ip",
                    help="IP address to serve on.", default="0.0.0.0")
     a.add_argument("-p", "--port", help="port to serve on", default="5050")
 
@@ -206,8 +206,8 @@ def run_sample_app():
 
     import SocketServer
     SocketServer.BaseServer.handle_error = close_stream
-    import example_app
-    example_app.run(args, conf, app, xyzzy)
+    import openstack_app
+    openstack_app.run(args, conf, app, xyzzy)
 
 
 if __name__ == "__main__":

@@ -1,20 +1,12 @@
 import datetime
 import json
-from math import ceil
 
 from repeated_timer import RepeatedTimer
 
-from novaclient.v1_1 import client as novaclient
-from cinderclient.v1 import client as cinderclient
-from keystoneclient.v2_0 import client as keystoneclient
-from neutronclient.v2_0 import client as neutronclient
-
 
 class DashieSampler(object):
-    def __init__(self, app, interval, conf=None, client_cache={}):
+    def __init__(self, app, interval):
         self._app = app
-        self._os_clients = client_cache
-        self._conf = conf
         self._timer = RepeatedTimer(interval, self._sample)
 
     def stop(self):
@@ -45,58 +37,3 @@ class DashieSampler(object):
         data = self.sample()
         if data:
             self._send_event(self.name(), data)
-
-    def _convert(self, num):
-        if num >= 1024 ** 3:
-            return int(ceil(num / (1024 ** 3))), 'GB'
-        elif num >= 1024 ** 2:
-            return int(ceil(num / (1024 ** 2))), 'MB'
-        elif num >= 1024:
-            return int(ceil(num / (1024))), 'KB'
-        else:
-            return num, 'B'
-
-    def _client(self, service, region):
-
-        if not self._os_clients.get(region):
-            self._os_clients[region] = {}
-
-        if not self._os_clients[region].get(service):
-            if service == 'compute':
-                client = novaclient.Client(
-                    self._conf['auth']['username'],
-                    self._conf['auth']['password'],
-                    self._conf['auth']['project_name'],
-                    self._conf['auth']['auth_url'],
-                    region_name=region,
-                    insecure=self._conf['auth']['insecure'])
-                self._os_clients[region][service] = client
-            elif service == 'network':
-                client = neutronclient.Client(
-                    username=self._conf['auth']['username'],
-                    password=self._conf['auth']['password'],
-                    tenant_name=self._conf['auth']['project_name'],
-                    auth_url=self._conf['auth']['auth_url'],
-                    region_name=region,
-                    insecure=self._conf['auth']['insecure'])
-                self._os_clients[region][service] = client
-            elif service == 'storage':
-                client = cinderclient.Client(
-                    self._conf['auth']['username'],
-                    self._conf['auth']['password'],
-                    self._conf['auth']['project_name'],
-                    self._conf['auth']['auth_url'],
-                    region_name=region,
-                    insecure=self._conf['auth']['insecure'])
-                self._os_clients[region][service] = client
-            elif service == 'identity':
-                client = keystoneclient.Client(
-                    username=self._conf['auth']['username'],
-                    password=self._conf['auth']['password'],
-                    project_name=self._conf['auth']['project_name'],
-                    auth_url=self._conf['auth']['auth_url'],
-                    region_name=region,
-                    insecure=self._conf['auth']['insecure'])
-                self._os_clients[region][service] = client
-
-        return self._os_clients[region][service]

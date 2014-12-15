@@ -1,3 +1,10 @@
 flask>=0.9
 CoffeeScript
 requests
+python-novaclient
+python-neutronclient
+python-cinderclient
+python-keystone
+paramiko
+pynag
+

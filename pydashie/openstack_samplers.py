@@ -1,11 +1,80 @@
 import collections
 import random
 import nagios
+from math import ceil
 
 from dashie_sampler import DashieSampler
 
+from novaclient.v1_1 import client as novaclient
+from cinderclient.v1 import client as cinderclient
+from keystoneclient.v2_0 import client as keystoneclient
+from neutronclient.v2_0 import client as neutronclient
 
-class CPUSampler(DashieSampler):
+
+class BaseOpenstackSampler(DashieSampler):
+    """docstring for ClassName"""
+    def __init__(self, app, interval, conf=None, client_cache={}):
+        self._os_clients = client_cache
+        self._conf = conf
+        super(BaseOpenstackSampler, self).__init__(app, interval)
+
+    def _convert(self, num):
+        if num >= 1024 ** 3:
+            return int(ceil(num / (1024 ** 3))), 'GB'
+        elif num >= 1024 ** 2:
+            return int(ceil(num / (1024 ** 2))), 'MB'
+        elif num >= 1024:
+            return int(ceil(num / (1024))), 'KB'
+        else:
+            return num, 'B'
+
+    def _client(self, service, region):
+
+        if not self._os_clients.get(region):
+            self._os_clients[region] = {}
+
+        if not self._os_clients[region].get(service):
+            if service == 'compute':
+                client = novaclient.Client(
+                    self._conf['auth']['username'],
+                    self._conf['auth']['password'],
+                    self._conf['auth']['project_name'],
+                    self._conf['auth']['auth_url'],
+                    region_name=region,
+                    insecure=self._conf['auth']['insecure'])
+                self._os_clients[region][service] = client
+            elif service == 'network':
+                client = neutronclient.Client(
+                    username=self._conf['auth']['username'],
+                    password=self._conf['auth']['password'],
+                    tenant_name=self._conf['auth']['project_name'],
+                    auth_url=self._conf['auth']['auth_url'],
+                    region_name=region,
+                    insecure=self._conf['auth']['insecure'])
+                self._os_clients[region][service] = client
+            elif service == 'storage':
+                client = cinderclient.Client(
+                    self._conf['auth']['username'],
+                    self._conf['auth']['password'],
+                    self._conf['auth']['project_name'],
+                    self._conf['auth']['auth_url'],
+                    region_name=region,
+                    insecure=self._conf['auth']['insecure'])
+                self._os_clients[region][service] = client
+            elif service == 'identity':
+                client = keystoneclient.Client(
+                    username=self._conf['auth']['username'],
+                    password=self._conf['auth']['password'],
+                    project_name=self._conf['auth']['project_name'],
+                    auth_url=self._conf['auth']['auth_url'],
+                    region_name=region,
+                    insecure=self._conf['auth']['insecure'])
+                self._os_clients[region][service] = client
+
+        return self._os_clients[region][service]
+
+
+class CPUSampler(BaseOpenstackSampler):
     def __init__(self, *args, **kwargs):
         super(CPUSampler, self).__init__(*args, **kwargs)
         self._last = 0
@@ -17,7 +86,7 @@ class CPUSampler(DashieSampler):
         max_cpu = 0
         cur_cpu = 0
 
-        for region in self._conf['regions']:
+        for region in self._conf['allocation'].keys():
             nova = self._client('compute', region)
             stats = nova.hypervisors.statistics()
             hypervisors = nova.hypervisors.list()
@@ -41,7 +110,7 @@ class CPUSampler(DashieSampler):
         return s
 
 
-class RAMSampler(DashieSampler):
+class RAMSampler(BaseOpenstackSampler):
     def __init__(self, *args, **kwargs):
         super(RAMSampler, self).__init__(*args, **kwargs)
         self._last = 0
@@ -53,7 +122,7 @@ class RAMSampler(DashieSampler):
         max_ram = 0
         cur_ram = 0
 
-        for region in self._conf['regions']:
+        for region in self._conf['allocation'].keys():
             nova = self._client('compute', region)
             stats = nova.hypervisors.statistics()
             hypervisors = nova.hypervisors.list()
@@ -83,7 +152,7 @@ class RAMSampler(DashieSampler):
         return s
 
 
-class IPSampler(DashieSampler):
+class IPSampler(BaseOpenstackSampler):
     def __init__(self, *args, **kwargs):
         super(IPSampler, self).__init__(*args, **kwargs)
         self._last = 0
@@ -95,7 +164,7 @@ class IPSampler(DashieSampler):
         max_ips = 0
         cur_ips = 0
 
-        for region in self._conf['regions']:
+        for region in self._conf['allocation'].keys():
             max_ips = (max_ips +
                        self._conf['allocation'][region]['total_floating_ips'])
 
@@ -121,7 +190,7 @@ class IPSampler(DashieSampler):
         return s
 
 
-class RegionsCPUSampler(DashieSampler):
+class RegionsCPUSampler(BaseOpenstackSampler):
     def __init__(self, *args, **kwargs):
         super(RegionsCPUSampler, self).__init__(*args, **kwargs)
 
@@ -131,7 +200,7 @@ class RegionsCPUSampler(DashieSampler):
     def sample(self):
         regions = []
 
-        for region in self._conf['regions']:
+        for region in self._conf['allocation'].keys():
             nova = self._client('compute', region)
             stats = nova.hypervisors.statistics()
             hypervisors = nova.hypervisors.list()
@@ -151,7 +220,7 @@ class RegionsCPUSampler(DashieSampler):
         return {'progress_items': regions}
 
 
-class RegionsRAMSampler(DashieSampler):
+class RegionsRAMSampler(BaseOpenstackSampler):
     def __init__(self, *args, **kwargs):
         super(RegionsRAMSampler, self).__init__(*args, **kwargs)
 
@@ -161,7 +230,7 @@ class RegionsRAMSampler(DashieSampler):
     def sample(self):
         regions = []
 
-        for region in self._conf['regions']:
+        for region in self._conf['allocation'].keys():
             nova = self._client('compute', region)
             stats = nova.hypervisors.statistics()
             hypervisors = nova.hypervisors.list()
@@ -186,7 +255,7 @@ class RegionsRAMSampler(DashieSampler):
         return {'progress_items': regions}
 
 
-class RegionIPSampler(DashieSampler):
+class RegionIPSampler(BaseOpenstackSampler):
     def __init__(self, *args, **kwargs):
         super(RegionIPSampler, self).__init__(*args, **kwargs)
         self._last = 0
@@ -197,7 +266,7 @@ class RegionIPSampler(DashieSampler):
     def sample(self):
         regions = []
 
-        for region in self._conf['regions']:
+        for region in self._conf['allocation'].keys():
             neutron = self._client('network', region)
 
             ips = neutron.list_floatingips()
@@ -219,7 +288,7 @@ class RegionIPSampler(DashieSampler):
         return {'progress_items': regions}
 
 
-class NagiosSampler(DashieSampler):
+class NagiosSampler(BaseOpenstackSampler):
     def __init__(self, *args, **kwargs):
         super(NagiosSampler, self).__init__(*args, **kwargs)
         self._last = 0
@@ -252,7 +321,7 @@ class NagiosSampler(DashieSampler):
         return s
 
 
-class NagiosRegionSampler(DashieSampler):
+class NagiosRegionSampler(BaseOpenstackSampler):
     def name(self):
         return 'nagios_regions'
 
@@ -282,7 +351,7 @@ class NagiosRegionSampler(DashieSampler):
         return {'criticals': criticals, 'warnings': warnings}
 
 
-class ResourceSampler(DashieSampler):
+class ResourceSampler(BaseOpenstackSampler):
     def name(self):
         return 'resources'
 
@@ -294,7 +363,7 @@ class ResourceSampler(DashieSampler):
                      # 'images': 0,
                      'vpns': 0}
 
-        for region in self._conf['regions']:
+        for region in self._conf['allocation'].keys():
             neutron = self._client('network', region)
             nova = self._client('compute', region)
             # cinder = self._client('storage', region)
@@ -325,7 +394,7 @@ class ResourceSampler(DashieSampler):
         return {'items': items}
 
 
-class ConvergenceSampler(DashieSampler):
+class ConvergenceSampler(BaseOpenstackSampler):
     def name(self):
         return 'convergence'
 
@@ -344,7 +413,7 @@ class ConvergenceSampler(DashieSampler):
         return {'points': list(self.items)}
 
 
-class UsageGaugeSampler(DashieSampler):
+class UsageGaugeSampler(BaseOpenstackSampler):
     def __init__(self, *args, **kwargs):
         super(UsageGaugeSampler, self).__init__(*args, **kwargs)
 

@@ -1,4 +1,4 @@
-from example_samplers import (
+from openstack_samplers import (
     CPUSampler,
     RAMSampler,
     IPSampler,
