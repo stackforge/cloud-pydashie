@@ -1,7 +1,7 @@
 Openstack-PyDashie
 ########
 
-PyDashy is a port of `Dashing <https://github.com/Shopify/dashing>`_ by `Shopify <http://www.shopify.com/>`_ to Python 2.7
+PyDashie is a port of `Dashing <https://github.com/Shopify/dashing>`_ by `Shopify <http://www.shopify.com/>`_ to Python 2.7
 
 This is simply an implementation of pydashie tailored to showing information about an openstack cluster with nagios/icinga for monitoring. It is primarily for internal use.
 
@@ -49,6 +49,11 @@ Configuration is handled via a yaml file as follows:
                 username: 'admin'
 
 Because of differences between allocation per region, and the need for a region list, each region is given it's own allocation data. We use this to know which regions to build clients for and aggregate data over, but in future might try and query a for a full region list and for allocation data from openstack itself.
+
+Widgets
+############
+
+Info on adding/removing/updating widgets will go here later.
 
 Installation
 ############
