@@ -60,13 +60,41 @@ Info on adding/removing/updating widgets will go here later.
 Installation
 ############
 
-For development purposes,
+**NOTE** Development/deployment has been done in a Ubuntu environment, so the following might be different for you. Also, the following is a step by step guide for installing into a clean server.
+
+Some of the python libraries have certain requirements, and the app itself needs a javascript service to deal with javascript files. As such you will need the following packages:
+
+    sudo apt-get install python-dev nodejs
+
+You will ideally want to run the app inside a virtualenv. If you don't have virtualenv installed you can get it via:
+
+    sudo apt-get install python-virtualenv
+
+And then create the environment by (this will create a directory for the environment, so be careful where you do this):
+
+    virtualenv <name_of_environment>
+
+To then activate it:
+
+    source <name_of_environment>/bin/activate
+
+Now that you are in your environment, you will need to install all the required python libraries:
+
+    sudo pip install -r requirements.txt
+
+At this point you can install the app itself.
+
+For development purposes use:
 
     python setup.py develop
 
-OR
+Which will build a python egg pointing to the local git files so that you can edit them and just restart the service when you change them.
+
+If you aren't planning to develop or edit the files:
 
     python setup.py install
+
+But if the files are changed, or you pull an update, you will need to rerun the install.
 
 Running
 ############
