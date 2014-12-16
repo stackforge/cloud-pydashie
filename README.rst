@@ -25,10 +25,8 @@ Configuration is handled via a yaml file as follows:
     main:
         log_file: pydashie.log
     openstack:
-        regions:        
-            - 'region1'
         allocation:
-            region1:
+            RegionOne:
                 vcpus_allocation_ratio: 2.0
                 ram_allocation_ratio: 1.0
                 # remove this amount per node available metric
@@ -45,9 +43,9 @@ Configuration is handled via a yaml file as follows:
             insecure: False
     nagios:
         services:
-            region1:
-                statfile: './region1-status.dat'
-                host: 'region1-mon0'
+            RegionOne:
+                statfile: './RegionOne-status.dat'
+                host: 'RegionOne-mon0'
                 username: 'admin'
 
 Because of differences between allocation per region, and the need for a region list, each region is given it's own allocation data. We use this to know which regions to build clients for and aggregate data over, but in future might try and query a for a full region list and for allocation data from openstack itself.
