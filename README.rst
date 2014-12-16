@@ -15,7 +15,7 @@ The nagios/icinga data is currently collected via ssh but in future might be mov
 
     https://github.com/catalyst/openstack-pydashie/blob/master/pydashie/assets/javascripts/app.js#L336
 
-Setup
+Configuration
 ############
 
 Configuration is handled via a yaml file as follows:
