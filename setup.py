@@ -7,17 +7,19 @@ except ImportError:
     use_setuptools()
     from setuptools import setup, find_packages
 
+from pip.req import parse_requirements
+
+install_reqs = parse_requirements('requirements.txt')
+
+reqs = [str(ir.req) for ir in install_reqs]
+
 
 setup(
     name='PyDashie',
     version='0.1dev',
     packages=['pydashie',],
     include_package_data=True,
-    install_requires=[
-        'Flask >= 0.10',
-        'Coffeescript >= 1.0.8',
-        'pyScss >= 1.2.0'
-    ],
+    install_requires=reqs,
     entry_points={
       'console_scripts': ['pydashie = pydashie.main:run_sample_app']
     },

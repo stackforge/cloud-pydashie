@@ -1,10 +1,10 @@
-flask>=0.9
+Flask
 CoffeeScript
-requests
+pyyaml
 python-novaclient
 python-neutronclient
 python-cinderclient
-python-keystone
+python-keystoneclient
 paramiko
 pynag
 
