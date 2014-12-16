@@ -17,7 +17,7 @@ reqs = [str(ir.req) for ir in install_reqs]
 setup(
     name='Openstack-PyDashie',
     version='0.2',
-    packages=['Openstack-PyDashie',],
+    packages=['pydashie',],
     include_package_data=True,
     install_requires=reqs,
     entry_points={
