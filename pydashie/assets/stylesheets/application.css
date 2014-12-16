@@ -17,7 +17,8 @@
         width: 100%;
         color: #ffffff;
         font-size: 1em;
-        text-align: center; }
+        text-align: center;
+        padding-bottom: 12px; }
         .widget.widget-progress-bars .row {
           height: 0%;
           width: 100%;
@@ -53,6 +54,9 @@
                   white-space: pre; }
   .widget.widget-progress-bars .zebra-stripe {
     background-color: #267f94; }
+    .widget.widget-progress-bars .updated-at {
+      color: rgba(0, 0, 0, 0.6);
+      font-size: 0.8em; }
 
 .widget-iframe {
   padding: 3px 0px 0px 0px !important; }

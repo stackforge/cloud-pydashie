@@ -46,6 +46,7 @@ $text-color:       $white;
     color: $text-color;
     font-size: $row-size;
     text-align:center;
+    padding-bottom: 12px;
   }
  
   .row {
@@ -95,6 +96,9 @@ $text-color:       $white;
     background-color: $base-color-light;
   }
  
- 
+  .updated-at {
+    color: rgba(0, 0, 0, 0.6);
+    font-size: 0.8em;
+  }
  
 }
