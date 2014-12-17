@@ -1,3 +1,5 @@
+import collections
+
 from openstack_samplers import (
     CPUSampler,
     RAMSampler,
@@ -15,17 +17,22 @@ from openstack_samplers import (
 def run(args, conf, app, xyzzy):
 
     client_cache = {}
+    response_cache = {'x': 0, 'items': collections.deque()}
 
     samplers = [
-        CPUSampler(xyzzy, 60, conf['openstack'], client_cache),
-        RAMSampler(xyzzy, 60, conf['openstack'], client_cache),
-        IPSampler(xyzzy, 60, conf['openstack'], client_cache),
-        RegionsCPUSampler(xyzzy, 60, conf['openstack'], client_cache),
-        RegionsRAMSampler(xyzzy, 60, conf['openstack'], client_cache),
-        RegionIPSampler(xyzzy, 60, conf['openstack'], client_cache),
+        CPUSampler(xyzzy, 60, conf['openstack'], client_cache, response_cache),
+        RAMSampler(xyzzy, 60, conf['openstack'], client_cache, response_cache),
+        IPSampler(xyzzy, 60, conf['openstack'], client_cache, response_cache),
+        RegionsCPUSampler(xyzzy, 60, conf['openstack'], client_cache,
+                          response_cache),
+        RegionsRAMSampler(xyzzy, 60, conf['openstack'], client_cache,
+                          response_cache),
+        RegionIPSampler(xyzzy, 60, conf['openstack'], client_cache,
+                        response_cache),
         NagiosSampler(xyzzy, 15, conf['nagios']),
         NagiosRegionSampler(xyzzy, 15, conf['nagios']),
-        ResourceSampler(xyzzy, 60, conf['openstack'], client_cache),
+        ResourceSampler(xyzzy, 60, conf['openstack'], client_cache,
+                        response_cache),
         # ConvergenceSampler(xyzzy, 1),
     ]
 

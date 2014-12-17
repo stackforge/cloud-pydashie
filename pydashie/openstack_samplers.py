@@ -16,11 +16,11 @@ from neutronclient.v2_0 import client as neutronclient
 
 class BaseOpenstackSampler(DashieSampler):
     """docstring for ClassName"""
-    def __init__(self, app, interval, conf=None, client_cache={}):
+    def __init__(self, app, interval, conf=None, client_cache={},
+                 response_cache={'x': 0, 'items': collections.deque()}):
         self._os_clients = client_cache
         self._conf = conf
-        self._res_time_X = 0
-        self._response_times = collections.deque()
+        self._response_cache = response_cache
         super(BaseOpenstackSampler, self).__init__(app, interval)
 
     def _convert(self, num):
@@ -86,30 +86,39 @@ class BaseOpenstackSampler(DashieSampler):
         self._api_response(int((end - start).total_seconds() * 1000))
 
     def _api_response(self, ms):
-        self._response_times.append({'x': self._res_time_X,
-                                     'y': ms})
-        self._res_time_X += 1
-        if len(self._response_times) > 50:
-            self._response_times.popleft()
+        self._response_cache['items'].append({'x': self._response_cache['x'],
+                                             'y': ms})
+        self._response_cache['x'] += 1
+
+        # to stop the x value getting too high
+        if self._response_cache['x'] == 1000000:
+            # reset the x value, and adjust the items
+            self._response_cache['x'] = 0
+            for time in self._response_cache['items']:
+                time['x'] = self._response_cache['x']
+                self._response_cache['x'] += 1
+
+        if len(self._response_cache['items']) > 100:
+            self._response_cache['items'].popleft()
 
         stats = {'min': -1, 'max': -1, 'avg': -1}
 
         total = 0
 
-        for time in self._response_times:
+        for time in self._response_cache['items']:
             total = total + time['y']
             if time['y'] > stats['max']:
                 stats['max'] = time['y']
             if stats['min'] == -1 or time['y'] < stats['min']:
                 stats['min'] = time['y']
 
-        stats['avg'] = int(total / len(self._response_times))
+        stats['avg'] = int(total / len(self._response_cache['items']))
 
         body = {}
         body['displayedValue'] = ("min: %s   max: %s   avg: %s" %
                                   (stats['min'], stats['max'],
                                    stats['avg']))
-        body['points'] = list(self._response_times)
+        body['points'] = list(self._response_cache['items'])
         body['id'] = 'api_response'
         body['updatedAt'] = (datetime.datetime.now().
                              strftime('%Y-%m-%d %H:%M:%S +0000'))
