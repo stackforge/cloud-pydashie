@@ -3,7 +3,6 @@ import datetime
 import json
 from contextlib import contextmanager
 
-import random
 import nagios
 from math import ceil
 
@@ -132,7 +131,7 @@ class CPUSampler(BaseOpenstackSampler):
         max_cpu = 0
         cur_cpu = 0
 
-        for region in self._conf['allocation'].keys():
+        for region, allocation in self._conf['allocation'].iteritems():
             nova = self._client('compute', region)
             with self.timed():
                 stats = nova.hypervisors.statistics()
@@ -141,9 +140,9 @@ class CPUSampler(BaseOpenstackSampler):
 
             reserved = 0
             for hypervisor in hypervisors:
-                reserved = reserved + self._conf['allocation'][region]['reserved_vcpus_per_node']
+                reserved = reserved + allocation['reserved_vcpus_per_node']
 
-            cpu_ratio = self._conf['allocation'][region]['vcpus_allocation_ratio']
+            cpu_ratio = allocation['vcpus_allocation_ratio']
 
             max_cpu = max_cpu + (stats.vcpus * cpu_ratio) - reserved
             cur_cpu = cur_cpu + stats.vcpus_used
@@ -170,7 +169,7 @@ class RAMSampler(BaseOpenstackSampler):
         max_ram = 0
         cur_ram = 0
 
-        for region in self._conf['allocation'].keys():
+        for region, allocation in self._conf['allocation'].iteritems():
             nova = self._client('compute', region)
             with self.timed():
                 stats = nova.hypervisors.statistics()
@@ -179,11 +178,12 @@ class RAMSampler(BaseOpenstackSampler):
 
             reserved = 0
             for hypervisor in hypervisors:
-                reserved = reserved + self._conf['allocation'][region]['reserved_ram_per_node']
+                reserved = reserved + allocation['reserved_ram_per_node']
 
-            ram_ratio = self._conf['allocation'][region]['ram_allocation_ratio']
+            ram_ratio = allocation['ram_allocation_ratio']
 
-            max_ram = max_ram + (stats.memory_mb * ram_ratio * 1024 * 1024) - reserved
+            max_ram = (max_ram +
+                       (stats.memory_mb * ram_ratio * 1024 * 1024) - reserved)
             cur_ram = cur_ram + stats.memory_mb_used * 1024 * 1024
 
         ram_converted = self._convert(max_ram)
@@ -252,7 +252,7 @@ class RegionsCPUSampler(BaseOpenstackSampler):
     def sample(self):
         regions = []
 
-        for region in self._conf['allocation'].keys():
+        for region, allocation in self._conf['allocation'].iteritems():
             nova = self._client('compute', region)
             with self.timed():
                 stats = nova.hypervisors.statistics()
@@ -261,14 +261,15 @@ class RegionsCPUSampler(BaseOpenstackSampler):
 
             reserved = 0
             for hypervisor in hypervisors:
-                reserved = reserved + self._conf['allocation'][region]['reserved_vcpus_per_node']
+                reserved = reserved + allocation['reserved_vcpus_per_node']
 
-            cpu_ratio = self._conf['allocation'][region]['vcpus_allocation_ratio']
+            cpu_ratio = allocation['vcpus_allocation_ratio']
 
             max_cpu = (stats.vcpus * cpu_ratio) - reserved
             cur_cpu = stats.vcpus_used
 
-            regions.append({'name': region, 'progress': (cur_cpu * 100.0) / max_cpu,
+            regions.append({'name': region,
+                            'progress': (cur_cpu * 100.0) / max_cpu,
                             'max': max_cpu, 'value': cur_cpu})
 
         return {'progress_items': regions}
@@ -284,7 +285,7 @@ class RegionsRAMSampler(BaseOpenstackSampler):
     def sample(self):
         regions = []
 
-        for region in self._conf['allocation'].keys():
+        for region, allocation in self._conf['allocation'].iteritems():
             nova = self._client('compute', region)
             with self.timed():
                 stats = nova.hypervisors.statistics()
@@ -293,9 +294,9 @@ class RegionsRAMSampler(BaseOpenstackSampler):
 
             reserved = 0
             for hypervisor in hypervisors:
-                reserved = reserved + self._conf['allocation'][region]['reserved_ram_per_node']
+                reserved = reserved + allocation['reserved_ram_per_node']
 
-            ram_ratio = self._conf['allocation'][region]['ram_allocation_ratio']
+            ram_ratio = allocation['ram_allocation_ratio']
 
             max_ram = (stats.memory_mb * ram_ratio * 1024 * 1024) - reserved
             cur_ram = stats.memory_mb_used * 1024 * 1024
@@ -398,13 +399,13 @@ class NagiosRegionSampler(BaseOpenstackSampler):
 
         # (adriant) the following is for easy testing:
         # regions = ['region1', 'region2', 'region3']
-        
+
         # criticals = []
         # warnings = []
 
         # for region in regions:
-        #     criticals.append({'label': region, 'value': random.randint(0, 5)})
-        #     warnings.append({'label': region, 'value': random.randint(0, 5)})
+        #    criticals.append({'label': region, 'value': random.randint(0, 5)})
+        #    warnings.append({'label': region, 'value': random.randint(0, 5)})
 
         return {'criticals': criticals, 'warnings': warnings}
 

@@ -67,7 +67,9 @@ def javascripts():
 
         output = []
         for path in scripts:
-            path = '{1}/{0}'.format(path, os.path.dirname(os.path.realpath(__file__)))
+            path = ('{1}/{0}'.
+                    format(path,
+                           os.path.dirname(os.path.realpath(__file__))))
             output.append('// JS: %s\n' % path)
             if '.coffee' in path:
                 log.info('Compiling Coffee for %s ' % path)
@@ -102,7 +104,8 @@ def application_css():
     ]
     output = ''
     for path in scripts:
-        path = '{1}/{0}'.format(path, os.path.dirname(os.path.realpath(__file__)))
+        path = '{1}/{0}'.format(path,
+                                os.path.dirname(os.path.realpath(__file__)))
         output = output + open(path).read()
     return Response(output, mimetype='text/css')
 
@@ -116,7 +119,8 @@ def send_static_img(filename):
 @app.route('/views/<widget_name>.html')
 def widget_html(widget_name):
     html = '%s.html' % widget_name
-    path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'widgets', widget_name, html)
+    path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                        'widgets', widget_name, html)
     if os.path.isfile(path):
         f = open(path)
         contents = f.read()
@@ -145,10 +149,12 @@ def events():
         current_app.logger.info('New Client %s connected. Total Clients: %s' %
                                 (event_stream_port, len(xyzzy.events_queue)))
 
-        # Start the newly connected client off by pushing the current last events
+        # Start the newly connected client off by pushing
+        # the current last events
         for event in xyzzy.last_events.values():
             current_event_queue.put(event)
-        return Response(pop_queue(current_event_queue), mimetype='text/event-stream')
+        return Response(pop_queue(current_event_queue),
+                        mimetype='text/event-stream')
 
     return Response(xyzzy.last_events.values(), mimetype='text/event-stream')
 
@@ -166,9 +172,11 @@ def pop_queue(current_event_queue):
 
 
 def purge_streams():
-    big_queues = [port for port, queue in xyzzy.events_queue if len(queue) > xyzzy.MAX_QUEUE_LENGTH]
+    big_queues = [port for port, queue in xyzzy.events_queue
+                  if len(queue) > xyzzy.MAX_QUEUE_LENGTH]
     for big_queue in big_queues:
-        current_app.logger.info('Client %s is stale. Disconnecting. Total Clients: %s' %
+        current_app.logger.info(('Client %s is stale. Disconnecting.' +
+                                 ' Total Clients: %s') %
                                 (big_queue, len(xyzzy.events_queue)))
         del queue[big_queue]
 
@@ -176,7 +184,8 @@ def purge_streams():
 def close_stream(*args, **kwargs):
     event_stream_port = args[2][1]
     del xyzzy.events_queue[event_stream_port]
-    log.info('Client %s disconnected. Total Clients: %s' % (event_stream_port, len(xyzzy.events_queue)))
+    log.info(('Client %s disconnected. Total Clients: %s' %
+              (event_stream_port, len(xyzzy.events_queue))))
 
 
 def run_sample_app():
