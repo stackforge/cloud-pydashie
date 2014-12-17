@@ -1,4 +1,8 @@
 import collections
+import datetime
+import json
+from contextlib import contextmanager
+
 import random
 import nagios
 from math import ceil
@@ -16,6 +20,8 @@ class BaseOpenstackSampler(DashieSampler):
     def __init__(self, app, interval, conf=None, client_cache={}):
         self._os_clients = client_cache
         self._conf = conf
+        self._res_time_X = 0
+        self._response_times = collections.deque()
         super(BaseOpenstackSampler, self).__init__(app, interval)
 
     def _convert(self, num):
@@ -73,6 +79,46 @@ class BaseOpenstackSampler(DashieSampler):
 
         return self._os_clients[region][service]
 
+    @contextmanager
+    def timed(self):
+        start = datetime.datetime.utcnow()
+        yield
+        end = datetime.datetime.utcnow()
+        self._api_response(int((end - start).total_seconds() * 1000))
+
+    def _api_response(self, ms):
+        self._response_times.append({'x': self._res_time_X,
+                                     'y': ms})
+        self._res_time_X += 1
+        if len(self._response_times) > 50:
+            self._response_times.popleft()
+
+        stats = {'min': -1, 'max': -1, 'avg': -1}
+
+        total = 0
+
+        for time in self._response_times:
+            total = total + time['y']
+            if time['y'] > stats['max']:
+                stats['max'] = time['y']
+            if stats['min'] == -1 or time['y'] < stats['min']:
+                stats['min'] = time['y']
+
+        stats['avg'] = int(total / len(self._response_times))
+
+        body = {}
+        body['displayedValue'] = ("min: %s   max: %s   avg: %s" %
+                                  (stats['min'], stats['max'],
+                                   stats['avg']))
+        body['points'] = list(self._response_times)
+        body['id'] = 'api_response'
+        body['updatedAt'] = (datetime.datetime.now().
+                             strftime('%Y-%m-%d %H:%M:%S +0000'))
+        formatted_json = 'data: %s\n\n' % (json.dumps(body))
+        self._app.last_events['api_response'] = formatted_json
+        for event_queue in self._app.events_queue.values():
+            event_queue.put(formatted_json)
+
 
 class CPUSampler(BaseOpenstackSampler):
     def __init__(self, *args, **kwargs):
@@ -88,8 +134,10 @@ class CPUSampler(BaseOpenstackSampler):
 
         for region in self._conf['allocation'].keys():
             nova = self._client('compute', region)
-            stats = nova.hypervisors.statistics()
-            hypervisors = nova.hypervisors.list()
+            with self.timed():
+                stats = nova.hypervisors.statistics()
+            with self.timed():
+                hypervisors = nova.hypervisors.list()
 
             reserved = 0
             for hypervisor in hypervisors:
@@ -124,8 +172,10 @@ class RAMSampler(BaseOpenstackSampler):
 
         for region in self._conf['allocation'].keys():
             nova = self._client('compute', region)
-            stats = nova.hypervisors.statistics()
-            hypervisors = nova.hypervisors.list()
+            with self.timed():
+                stats = nova.hypervisors.statistics()
+            with self.timed():
+                hypervisors = nova.hypervisors.list()
 
             reserved = 0
             for hypervisor in hypervisors:
@@ -170,8 +220,10 @@ class IPSampler(BaseOpenstackSampler):
 
             neutron = self._client('network', region)
 
-            ips = neutron.list_floatingips()
-            routers = neutron.list_routers()
+            with self.timed():
+                ips = neutron.list_floatingips()
+            with self.timed():
+                routers = neutron.list_routers()
 
             net_gateways = 0
             for router in routers['routers']:
@@ -202,8 +254,10 @@ class RegionsCPUSampler(BaseOpenstackSampler):
 
         for region in self._conf['allocation'].keys():
             nova = self._client('compute', region)
-            stats = nova.hypervisors.statistics()
-            hypervisors = nova.hypervisors.list()
+            with self.timed():
+                stats = nova.hypervisors.statistics()
+            with self.timed():
+                hypervisors = nova.hypervisors.list()
 
             reserved = 0
             for hypervisor in hypervisors:
@@ -232,8 +286,10 @@ class RegionsRAMSampler(BaseOpenstackSampler):
 
         for region in self._conf['allocation'].keys():
             nova = self._client('compute', region)
-            stats = nova.hypervisors.statistics()
-            hypervisors = nova.hypervisors.list()
+            with self.timed():
+                stats = nova.hypervisors.statistics()
+            with self.timed():
+                hypervisors = nova.hypervisors.list()
 
             reserved = 0
             for hypervisor in hypervisors:
@@ -269,8 +325,10 @@ class RegionIPSampler(BaseOpenstackSampler):
         for region in self._conf['allocation'].keys():
             neutron = self._client('network', region)
 
-            ips = neutron.list_floatingips()
-            routers = neutron.list_routers()
+            with self.timed():
+                ips = neutron.list_floatingips()
+            with self.timed():
+                routers = neutron.list_routers()
 
             net_gateways = 0
             for router in routers['routers']:
@@ -368,18 +426,22 @@ class ResourceSampler(BaseOpenstackSampler):
             nova = self._client('compute', region)
             # cinder = self._client('storage', region)
 
-            stats = nova.hypervisors.statistics()
+            with self.timed():
+                stats = nova.hypervisors.statistics()
             resources['instances'] = resources['instances'] + stats.running_vms
 
-            routers = neutron.list_routers()
+            with self.timed():
+                routers = neutron.list_routers()
             resources['routers'] = (resources['routers'] +
                                     len(routers['routers']))
 
-            networks = neutron.list_networks()
+            with self.timed():
+                networks = neutron.list_networks()
             resources['networks'] = (resources['networks'] +
                                      len(networks['networks']))
 
-            vpns = neutron.list_vpnservices()
+            with self.timed():
+                vpns = neutron.list_vpnservices()
             resources['vpns'] = (resources['vpns'] +
                                  len(vpns['vpnservices']))
 
@@ -392,33 +454,3 @@ class ResourceSampler(BaseOpenstackSampler):
             items.append({'label': key, 'value': value})
 
         return {'items': items}
-
-
-class ConvergenceSampler(BaseOpenstackSampler):
-    def name(self):
-        return 'convergence'
-
-    def __init__(self, *args, **kwargs):
-        self.seedX = 0
-        self.items = collections.deque()
-        super(ConvergenceSampler, self).__init__(*args, **kwargs)
-
-    def sample(self):
-        self.items.append({'x': self.seedX,
-                           'y': random.randint(0, 20)})
-        self.seedX += 1
-        if len(self.items) > 10:
-            self.items.popleft()
-
-        return {'points': list(self.items)}
-
-
-class UsageGaugeSampler(BaseOpenstackSampler):
-    def __init__(self, *args, **kwargs):
-        super(UsageGaugeSampler, self).__init__(*args, **kwargs)
-
-    def name(self):
-        return 'usage_gauge'
-
-    def sample(self):
-        return {'value': random.randint(0, 100), 'max': 100}
