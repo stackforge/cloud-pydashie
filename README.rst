@@ -9,7 +9,7 @@ It uses the standard python clients for collecting formation from openstack acro
 
 The nagios/icinga data is currently collected via ssh but in future might be moved to MKlivestatus as the current method is roundabout.
 
-.. image:: http://catalyst.github.com/openstack-pydashie/images/mainscreen.png
+.. image:: https://raw.githubusercontent.com/catalyst/openstack-pydashie/master/mainscreen.png
 
 **NOTE**: The current layout is hardcoded for 1080p. This might be changed to be configurable by the conf.yaml later. If you need to change the sizing, you can do so by changing the widget dimensions and number of columns within this function:
 
