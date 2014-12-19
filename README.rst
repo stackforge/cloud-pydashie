@@ -1,4 +1,4 @@
-Openstack-PyDashie
+Cloud-PyDashie
 ########
 
 PyDashie is a port of `Dashing <https://github.com/Shopify/dashing>`_ by `Shopify <http://www.shopify.com/>`_ to Python 2.7
@@ -60,7 +60,7 @@ Info on adding/removing/updating widgets will go here later.
 Installation
 ############
 
-**NOTE** Development/deployment has been done in a Ubuntu environment, so the following might be different for you. Also, the following is a step by step guide for installing into a clean server.
+**NOTE**: Development/deployment has been done in a Ubuntu environment, so the following might be different for you. Also, the following is a step by step guide for installing into a clean server.
 
 Some of the python libraries have certain requirements, and the app itself needs a javascript service to deal with javascript files. As such you will need the following packages:
 
