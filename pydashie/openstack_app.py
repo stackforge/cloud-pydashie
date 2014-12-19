@@ -10,14 +10,14 @@ from openstack_samplers import (
     NagiosSampler,
     NagiosRegionSampler,
     ResourceSampler,
-    # ConvergenceSampler,
+    APISampler,
 )
 
 
 def run(args, conf, app, xyzzy):
 
     client_cache = {}
-    response_cache = {'x': 0, 'items': collections.deque()}
+    response_cache = {'regions': {}, 'events': collections.deque()}
 
     samplers = [
         CPUSampler(xyzzy, 60, conf['openstack'], client_cache, response_cache),
@@ -33,7 +33,7 @@ def run(args, conf, app, xyzzy):
         NagiosRegionSampler(xyzzy, 15, conf['nagios']),
         ResourceSampler(xyzzy, 60, conf['openstack'], client_cache,
                         response_cache),
-        # ConvergenceSampler(xyzzy, 1),
+        APISampler(xyzzy, 15, conf['openstack'], client_cache, response_cache),
     ]
 
     try:

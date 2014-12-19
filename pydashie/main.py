@@ -59,7 +59,7 @@ def javascripts():
             'widgets/usage_gauge/usage_gauge.coffee',
             'widgets/nagios/nagios.coffee',
             'widgets/nagios_list/nagios_list.coffee',
-            'widgets/graph/graph.coffee',
+            'widgets/rickshawgraph/rickshawgraph.coffee'
         ]
         nizzle = True
         if not nizzle:
