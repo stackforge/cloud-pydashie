@@ -4,7 +4,7 @@
 $background-color:  #59615F;
 
 $title-color:       rgba(255, 255, 255, 1);
-$moreinfo-color:    rgba(20, 20, 20, 0.8);
+$moreinfo-color:    rgba(255, 255, 255, 1);
 $tick-color:        rgba(0, 0, 0, 1);
 
 
@@ -29,7 +29,7 @@ $tick-color:        rgba(0, 0, 0, 1);
 
   svg {
     position: absolute;
-    fill-opacity: 0.7;
+    fill-opacity: 0.6;
     left: 0px;
     top: 0px;
   }

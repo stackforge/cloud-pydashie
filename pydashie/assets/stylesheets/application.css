@@ -76,7 +76,7 @@
       white-space: pre; }
       .widget-rickshawgraph svg {
         position: absolute;
-        fill-opacity: 0.7;
+        fill-opacity: 0.6;
         left: 0px;
         top: 0px; }
         .widget-rickshawgraph .title, .widget-rickshawgraph .value {
@@ -85,7 +85,7 @@
           .widget-rickshawgraph .title {
             color: white; }
             .widget-rickshawgraph .more-info {
-              color: rgba(20, 20, 20, 0.8);
+              color: white;
               font-weight: 600;
               font-size: 18px;
               margin-top: 0;
