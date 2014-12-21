@@ -17,8 +17,7 @@ from openstack_samplers import (
 def run(args, conf, app, xyzzy):
 
     client_cache = {}
-    response_cache = {'regions': {}, 'services': {},
-                      'events': collections.deque()}
+    response_cache = {'regions': {}, 'events': collections.deque()}
 
     samplers = [
         CPUSampler(xyzzy, 60, conf['openstack'], client_cache, response_cache),

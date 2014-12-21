@@ -78,17 +78,14 @@ class BaseOpenstackSampler(DashieSampler):
         return self._os_clients[region][service]
 
     @contextmanager
-    def timed(self, region, service):
+    def timed(self, region):
         start = datetime.datetime.utcnow()
         yield
         end = datetime.datetime.utcnow()
-        self._api_response(int((end - start).total_seconds() * 1000),
-                           region, service)
+        self._api_response(int((end - start).total_seconds() * 1000), region)
 
-    def _api_response(self, ms, region, service):
-        self._response_cache['events'].append({'region': region,
-                                               'service': service,
-                                               'ms': ms})
+    def _api_response(self, ms, region):
+        self._response_cache['events'].append({'region': region, 'ms': ms})
 
 
 class CPUSampler(BaseOpenstackSampler):
@@ -105,9 +102,9 @@ class CPUSampler(BaseOpenstackSampler):
 
         for region, allocation in self._conf['allocation'].iteritems():
             nova = self._client('compute', region)
-            with self.timed(region, 'compute'):
+            with self.timed(region):
                 stats = nova.hypervisors.statistics()
-            with self.timed(region, 'compute'):
+            with self.timed(region):
                 hypervisors = nova.hypervisors.list()
 
             reserved = 0
@@ -143,9 +140,9 @@ class RAMSampler(BaseOpenstackSampler):
 
         for region, allocation in self._conf['allocation'].iteritems():
             nova = self._client('compute', region)
-            with self.timed(region, 'compute'):
+            with self.timed(region):
                 stats = nova.hypervisors.statistics()
-            with self.timed(region, 'compute'):
+            with self.timed(region):
                 hypervisors = nova.hypervisors.list()
 
             reserved = 0
@@ -192,9 +189,9 @@ class IPSampler(BaseOpenstackSampler):
 
             neutron = self._client('network', region)
 
-            with self.timed(region, 'network'):
+            with self.timed(region):
                 ips = neutron.list_floatingips()
-            with self.timed(region, 'network'):
+            with self.timed(region):
                 routers = neutron.list_routers()
 
             net_gateways = 0
@@ -226,9 +223,9 @@ class RegionsCPUSampler(BaseOpenstackSampler):
 
         for region, allocation in self._conf['allocation'].iteritems():
             nova = self._client('compute', region)
-            with self.timed(region, 'compute'):
+            with self.timed(region):
                 stats = nova.hypervisors.statistics()
-            with self.timed(region, 'compute'):
+            with self.timed(region):
                 hypervisors = nova.hypervisors.list()
 
             reserved = 0
@@ -259,9 +256,9 @@ class RegionsRAMSampler(BaseOpenstackSampler):
 
         for region, allocation in self._conf['allocation'].iteritems():
             nova = self._client('compute', region)
-            with self.timed(region, 'compute'):
+            with self.timed(region):
                 stats = nova.hypervisors.statistics()
-            with self.timed(region, 'compute'):
+            with self.timed(region):
                 hypervisors = nova.hypervisors.list()
 
             reserved = 0
@@ -298,9 +295,9 @@ class RegionIPSampler(BaseOpenstackSampler):
         for region in self._conf['allocation'].keys():
             neutron = self._client('network', region)
 
-            with self.timed(region, 'network'):
+            with self.timed(region):
                 ips = neutron.list_floatingips()
-            with self.timed(region, 'network'):
+            with self.timed(region):
                 routers = neutron.list_routers()
 
             net_gateways = 0
@@ -389,7 +386,6 @@ class NagiosRegionSampler(BaseOpenstackSampler):
 
 
 class ResourceSampler(BaseOpenstackSampler):
-
     def name(self):
         return 'resources'
 
@@ -406,21 +402,21 @@ class ResourceSampler(BaseOpenstackSampler):
             nova = self._client('compute', region)
             # cinder = self._client('storage', region)
 
-            with self.timed(region, 'compute'):
+            with self.timed(region):
                 stats = nova.hypervisors.statistics()
             resources['instances'] = resources['instances'] + stats.running_vms
 
-            with self.timed(region, 'network'):
+            with self.timed(region):
                 routers = neutron.list_routers()
             resources['routers'] = (resources['routers'] +
                                     len(routers['routers']))
 
-            with self.timed(region, 'network'):
+            with self.timed(region):
                 networks = neutron.list_networks()
             resources['networks'] = (resources['networks'] +
                                      len(networks['networks']))
 
-            with self.timed(region, 'network'):
+            with self.timed(region):
                 vpns = neutron.list_vpnservices()
             resources['vpns'] = (resources['vpns'] +
                                  len(vpns['vpnservices']))
@@ -437,11 +433,6 @@ class ResourceSampler(BaseOpenstackSampler):
 
 
 class APISampler(BaseOpenstackSampler):
-
-    def __init__(self, *args, **kwargs):
-        super(APISampler, self).__init__(*args, **kwargs)
-        self._by_region = True
-
     def name(self):
         return 'api_response'
 
@@ -450,35 +441,21 @@ class APISampler(BaseOpenstackSampler):
             self._process_event(self._response_cache['events'].popleft())
 
         displayedValue = ""
-        series = []
+        regions = []
 
-        if self._by_region:
-            for region, cache in self._response_cache['regions'].iteritems():
-                displayedValue += ("%s - (min: %s  max: %s  avg: %s)\n" %
-                                   (region,
-                                    cache['stats']['min'],
-                                    cache['stats']['max'],
-                                    cache['stats']['avg']))
-                series.append({'name': region, 'data': list(cache['items'])})
+        for region, cache in self._response_cache['regions'].iteritems():
+            displayedValue += ("%s - (min: %s  max: %s  avg: %s)\n" %
+                               (region,
+                                cache['stats']['min'],
+                                cache['stats']['max'],
+                                cache['stats']['avg']))
+            regions.append({'name': region, 'data': list(cache['items'])})
 
-            self._by_region = not self._by_region
-            return {'displayedValue': displayedValue, 'series': series}
-        else:
-            for service, cache in self._response_cache['services'].iteritems():
-                displayedValue += ("%s - (min: %s  max: %s  avg: %s)\n" %
-                                   (service,
-                                    cache['stats']['min'],
-                                    cache['stats']['max'],
-                                    cache['stats']['avg']))
-                series.append({'name': service, 'data': list(cache['items'])})
-
-            self._by_region = not self._by_region
-            return {'displayedValue': displayedValue, 'series': series}
+        return {'displayedValue': displayedValue, 'series': regions}
 
     def _process_event(self, event):
 
         region_cache = self._response_cache['regions'].get(event['region'])
-        service_cache = self._response_cache['services'].get(event['service'])
 
         if region_cache:
             region_cache['items'].append({'x': region_cache['x'],
@@ -491,19 +468,7 @@ class APISampler(BaseOpenstackSampler):
                                           'y': event['ms']})
             self._response_cache['regions'][event['region']] = region_cache
 
-        if service_cache:
-            service_cache['items'].append({'x': service_cache['x'],
-                                           'y': event['ms']})
-        else:
-            service_cache = {}
-            service_cache['items'] = collections.deque()
-            service_cache['x'] = 0
-            service_cache['items'].append({'x': service_cache['x'],
-                                           'y': event['ms']})
-            self._response_cache['services'][event['service']] = service_cache
-
         region_cache['x'] += 1
-        service_cache['x'] += 1
 
         # to stop the x value getting too high
         if region_cache['x'] == 1000000:
@@ -513,44 +478,20 @@ class APISampler(BaseOpenstackSampler):
                 time['x'] = region_cache['x']
                 region_cache['x'] += 1
 
-        # to stop the x value getting too high
-        if service_cache['x'] == 1000000:
-            # reset the x value, and adjust the items
-            service_cache['x'] = 0
-            for time in service_cache['items']:
-                time['x'] = service_cache['x']
-                service_cache['x'] += 1
-
         if len(region_cache['items']) > 100:
             region_cache['items'].popleft()
 
-        if len(service_cache['items']) > 100:
-            service_cache['items'].popleft()
+        stats = {'min': -1, 'max': -1, 'avg': -1}
 
-        region_stats = {'min': -1, 'max': -1, 'avg': -1}
-        region_total = 0
+        total = 0
 
         for time in region_cache['items']:
-            region_total += time['y']
-            if time['y'] > region_stats['max']:
-                region_stats['max'] = time['y']
-            if region_stats['min'] == -1 or time['y'] < region_stats['min']:
-                region_stats['min'] = time['y']
+            total = total + time['y']
+            if time['y'] > stats['max']:
+                stats['max'] = time['y']
+            if stats['min'] == -1 or time['y'] < stats['min']:
+                stats['min'] = time['y']
 
-        region_stats['avg'] = int(region_total / len(region_cache['items']))
+        stats['avg'] = int(total / len(region_cache['items']))
 
-        region_cache['stats'] = region_stats
-
-        service_stats = {'min': -1, 'max': -1, 'avg': -1}
-        service_total = 0
-
-        for time in service_cache['items']:
-            service_total += time['y']
-            if time['y'] > service_stats['max']:
-                service_stats['max'] = time['y']
-            if service_stats['min'] == -1 or time['y'] < service_stats['min']:
-                service_stats['min'] = time['y']
-
-        service_stats['avg'] = int(service_total / len(service_cache['items']))
-
-        service_cache['stats'] = service_stats
+        region_cache['stats'] = stats
