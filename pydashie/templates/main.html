@@ -28,11 +28,11 @@
           <div data-id="nagios" data-view="Nagios" data-unordered="true" data-title="Icinga Prod" data-moreinfo="Unacknowledged events"></div>
         </li>
 
-        <li data-row="1" data-col="3" data-sizex="1" data-sizey="2">
+        <li data-row="2" data-col="3" data-sizex="1" data-sizey="2">
           <div data-id="resources" data-view="List" data-title="Resource Totals" data-unordered="true" data-moreinfo="Aggregate resources across all regions." ></div>
         </li>
 
-        <li data-row="2" data-col="2" data-sizex="1" data-sizey="1">
+        <li data-row="1" data-col="3" data-sizex="1" data-sizey="1">
           <div data-id="nagios_regions" data-view="NagiosList" data-title="Nagios by region" data-subtitle1="Criticals" data-subtitle2="Warnings"></div>
         </li> 
 
@@ -60,8 +60,14 @@
           <div data-id="ips_regions" data-view="ProgressBars" data-title="IPs provisioned per region"></div>
         </li>    
 
-        <li data-row="3" data-col="2" data-sizex="2" data-sizey="1">
-          <div data-id="api_response" data-view="Rickshawgraph" data-title="Api Response Times (ms)" data-moreinfo="out of 100 last queries" data-color-scheme="default" data-legend="true" data-unstack='true' data-renderer="area"></div>
+        <li data-row="2" data-col="1" data-sizex="2" data-sizey="1">
+          <div data-id="api_region_response" data-view="Rickshawgraph" data-title="Api Response Times by Region (ms)" data-moreinfo="out of 100 last queries" data-color-scheme="default" data-legend="true" data-unstack='true' data-renderer="area"
+          data-max='3200'></div>
+        </li>
+
+        <li data-row="3" data-col="1" data-sizex="2" data-sizey="1">
+          <div data-id="api_service_response" data-view="Rickshawgraph" data-title="Api Response Times by Service (ms)" data-moreinfo="out of 100 last queries" data-color-scheme="default" data-legend="true" data-unstack='true' data-renderer="area"
+          data-max='3200'></div>
         </li>
 
       </ul>

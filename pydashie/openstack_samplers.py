@@ -86,9 +86,10 @@ class BaseOpenstackSampler(DashieSampler):
                            region, service)
 
     def _api_response(self, ms, region, service):
-        self._response_cache['events'].append({'region': region,
-                                               'service': service,
-                                               'ms': ms})
+        self._response_cache['events']['region'].append(
+            {'region': region, 'service': service, 'ms': ms})
+        self._response_cache['events']['service'].append(
+            {'region': region, 'service': service, 'ms': ms})
 
 
 class CPUSampler(BaseOpenstackSampler):
@@ -436,121 +437,110 @@ class ResourceSampler(BaseOpenstackSampler):
         return {'items': items}
 
 
-class APISampler(BaseOpenstackSampler):
+class BaseAPISamper(BaseOpenstackSampler):
 
-    def __init__(self, *args, **kwargs):
-        super(APISampler, self).__init__(*args, **kwargs)
-        self._by_region = True
+    def _process_event(self, cache, key, ms, base_cache):
+
+        if cache:
+            cache['items'].append({'x': cache['x'],
+                                   'y': ms})
+        else:
+            cache = {}
+            cache['items'] = collections.deque()
+            cache['x'] = 0
+            cache['items'].append({'x': cache['x'],
+                                   'y': ms})
+            base_cache[key] = cache
+
+        cache['x'] += 1
+
+        # to stop the x value getting too high
+        if cache['x'] == 1000000:
+            # reset the x value, and adjust the items
+            cache['x'] = 0
+            for time in cache['items']:
+                time['x'] = cache['x']
+                cache['x'] += 1
+
+        if len(cache['items']) > 100:
+            cache['items'].popleft()
+
+        stats = {'min': -1, 'max': -1, 'avg': -1}
+        total = 0
+
+        for time in cache['items']:
+            total += time['y']
+            if time['y'] > stats['max']:
+                stats['max'] = time['y']
+            if stats['min'] == -1 or time['y'] < stats['min']:
+                stats['min'] = time['y']
+
+        stats['avg'] = int(total / len(cache['items']))
+
+        cache['stats'] = stats
+
+
+class APIRegionSampler(BaseAPISamper):
 
     def name(self):
-        return 'api_response'
+        return 'api_region_response'
 
     def sample(self):
-        while self._response_cache['events']:
-            self._process_event(self._response_cache['events'].popleft())
+        while self._response_cache['events']['region']:
+            event = self._response_cache['events']['region'].popleft()
+            cache = self._response_cache['regions'].get(event['region'])
+            self._process_event(cache, event['region'], event['ms'],
+                                self._response_cache['regions'])
 
         displayedValue = ""
         series = []
 
-        if self._by_region:
-            for region, cache in self._response_cache['regions'].iteritems():
-                displayedValue += ("%s - (min: %s  max: %s  avg: %s)\n" %
-                                   (region,
-                                    cache['stats']['min'],
-                                    cache['stats']['max'],
-                                    cache['stats']['avg']))
-                series.append({'name': region, 'data': list(cache['items'])})
+        for region, cache in self._response_cache['regions'].iteritems():
+            displayedValue += ("%s - (min: %s  max: %s  avg: %s)\n" %
+                               (region,
+                                cache['stats']['min'],
+                                cache['stats']['max'],
+                                cache['stats']['avg']))
+            series.append({'name': region, 'data': list(cache['items'])})
+        return {'displayedValue': displayedValue, 'series': series}
 
-            self._by_region = not self._by_region
-            return {'displayedValue': displayedValue, 'series': series}
-        else:
-            for service, cache in self._response_cache['services'].iteritems():
+
+class ServiceAPISampler(BaseAPISamper):
+    def __init__(self, *args, **kwargs):
+        super(ServiceAPISampler, self).__init__(*args, **kwargs)
+        self.service_list = []
+
+    def name(self):
+        return 'api_service_response'
+
+    def sample(self):
+        while self._response_cache['events']['service']:
+            event = self._response_cache['events']['service'].popleft()
+            cache = self._response_cache['services'].get(event['service'])
+            self._process_event(cache, event['service'], event['ms'],
+                                self._response_cache['services'])
+
+        if not self.service_list:
+            self.service_list = self._response_cache['services'].keys()
+            self.next_service = 0
+
+        displayedValue = ""
+        series = []
+
+        while True:
+            try:
+                service = self.service_list[self.next_service]
+                cache = self._response_cache['services'][service]
                 displayedValue += ("%s - (min: %s  max: %s  avg: %s)\n" %
                                    (service,
                                     cache['stats']['min'],
                                     cache['stats']['max'],
                                     cache['stats']['avg']))
                 series.append({'name': service, 'data': list(cache['items'])})
-
-            self._by_region = not self._by_region
-            return {'displayedValue': displayedValue, 'series': series}
-
-    def _process_event(self, event):
-
-        region_cache = self._response_cache['regions'].get(event['region'])
-        service_cache = self._response_cache['services'].get(event['service'])
-
-        if region_cache:
-            region_cache['items'].append({'x': region_cache['x'],
-                                          'y': event['ms']})
-        else:
-            region_cache = {}
-            region_cache['items'] = collections.deque()
-            region_cache['x'] = 0
-            region_cache['items'].append({'x': region_cache['x'],
-                                          'y': event['ms']})
-            self._response_cache['regions'][event['region']] = region_cache
-
-        if service_cache:
-            service_cache['items'].append({'x': service_cache['x'],
-                                           'y': event['ms']})
-        else:
-            service_cache = {}
-            service_cache['items'] = collections.deque()
-            service_cache['x'] = 0
-            service_cache['items'].append({'x': service_cache['x'],
-                                           'y': event['ms']})
-            self._response_cache['services'][event['service']] = service_cache
-
-        region_cache['x'] += 1
-        service_cache['x'] += 1
-
-        # to stop the x value getting too high
-        if region_cache['x'] == 1000000:
-            # reset the x value, and adjust the items
-            region_cache['x'] = 0
-            for time in region_cache['items']:
-                time['x'] = region_cache['x']
-                region_cache['x'] += 1
-
-        # to stop the x value getting too high
-        if service_cache['x'] == 1000000:
-            # reset the x value, and adjust the items
-            service_cache['x'] = 0
-            for time in service_cache['items']:
-                time['x'] = service_cache['x']
-                service_cache['x'] += 1
-
-        if len(region_cache['items']) > 100:
-            region_cache['items'].popleft()
-
-        if len(service_cache['items']) > 100:
-            service_cache['items'].popleft()
-
-        region_stats = {'min': -1, 'max': -1, 'avg': -1}
-        region_total = 0
-
-        for time in region_cache['items']:
-            region_total += time['y']
-            if time['y'] > region_stats['max']:
-                region_stats['max'] = time['y']
-            if region_stats['min'] == -1 or time['y'] < region_stats['min']:
-                region_stats['min'] = time['y']
-
-        region_stats['avg'] = int(region_total / len(region_cache['items']))
-
-        region_cache['stats'] = region_stats
-
-        service_stats = {'min': -1, 'max': -1, 'avg': -1}
-        service_total = 0
-
-        for time in service_cache['items']:
-            service_total += time['y']
-            if time['y'] > service_stats['max']:
-                service_stats['max'] = time['y']
-            if service_stats['min'] == -1 or time['y'] < service_stats['min']:
-                service_stats['min'] = time['y']
-
-        service_stats['avg'] = int(service_total / len(service_cache['items']))
-
-        service_cache['stats'] = service_stats
+                self.next_service += 1
+                return {'displayedValue': displayedValue, 'series': series}
+            except IndexError:
+                if self.next_service == 0:
+                    break
+                self.service_list = self._response_cache['services'].keys()
+                self.next_service = 0
