@@ -108,11 +108,9 @@ class CPUSampler(BaseOpenstackSampler):
             nova = self._client('compute', region)
             with self.timed(region, 'compute'):
                 stats = nova.hypervisors.statistics()
-            with self.timed(region, 'compute'):
-                hypervisors = nova.hypervisors.list()
 
-            reserved = 0
-            for hypervisor in hypervisors:
+            reserved = allocation['reserved_vcpus']
+            for i in range(stats.count):
                 reserved = reserved + allocation['reserved_vcpus_per_node']
 
             cpu_ratio = allocation['vcpus_allocation_ratio']
@@ -146,11 +144,9 @@ class RAMSampler(BaseOpenstackSampler):
             nova = self._client('compute', region)
             with self.timed(region, 'compute'):
                 stats = nova.hypervisors.statistics()
-            with self.timed(region, 'compute'):
-                hypervisors = nova.hypervisors.list()
 
-            reserved = 0
-            for hypervisor in hypervisors:
+            reserved = allocation['reserved_ram']
+            for i in range(stats.count):
                 reserved = reserved + allocation['reserved_ram_per_node']
 
             ram_ratio = allocation['ram_allocation_ratio']
@@ -229,11 +225,9 @@ class RegionsCPUSampler(BaseOpenstackSampler):
             nova = self._client('compute', region)
             with self.timed(region, 'compute'):
                 stats = nova.hypervisors.statistics()
-            with self.timed(region, 'compute'):
-                hypervisors = nova.hypervisors.list()
 
-            reserved = 0
-            for hypervisor in hypervisors:
+            reserved = allocation['reserved_vcpus']
+            for i in range(stats.count):
                 reserved = reserved + allocation['reserved_vcpus_per_node']
 
             cpu_ratio = allocation['vcpus_allocation_ratio']
@@ -262,11 +256,9 @@ class RegionsRAMSampler(BaseOpenstackSampler):
             nova = self._client('compute', region)
             with self.timed(region, 'compute'):
                 stats = nova.hypervisors.statistics()
-            with self.timed(region, 'compute'):
-                hypervisors = nova.hypervisors.list()
 
-            reserved = 0
-            for hypervisor in hypervisors:
+            reserved = allocation['reserved_ram']
+            for i in range(stats.count):
                 reserved = reserved + allocation['reserved_ram_per_node']
 
             ram_ratio = allocation['ram_allocation_ratio']
