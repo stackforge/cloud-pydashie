@@ -3,7 +3,6 @@ import datetime
 from contextlib import contextmanager
 
 import nagios
-from math import ceil
 
 from dashie_sampler import DashieSampler
 
@@ -22,15 +21,33 @@ class BaseOpenstackSampler(DashieSampler):
         self._response_cache = response_cache
         super(BaseOpenstackSampler, self).__init__(app, interval)
 
-    def _convert(self, num):
-        if num >= 1024 ** 3:
-            return int(ceil(num / (1024 ** 3))), 'GB'
-        elif num >= 1024 ** 2:
-            return int(ceil(num / (1024 ** 2))), 'MB'
-        elif num >= 1024:
-            return int(ceil(num / (1024))), 'KB'
+    def _convert(self, num, num2=None):
+        if num2 is None:
+            if num >= 1024 ** 4:
+                return int(round(num / (1024 ** 4), 0)), 'TB'
+            elif num >= 1024 ** 3:
+                return int(round(num / (1024 ** 3), 0)), 'GB'
+            elif num >= 1024 ** 2:
+                return int(round(num / (1024 ** 2), 0)), 'MB'
+            elif num >= 1024:
+                return int(round(num / (1024), 0)), 'KB'
+            else:
+                return num, 'B'
         else:
-            return num, 'B'
+            if num >= 1024 ** 4 and num2 >= 1024 ** 4:
+                return ((int(round(num / (1024 ** 4), 0)), 'TB'),
+                        (int(round(num2 / (1024 ** 4), 0)), 'TB'))
+            elif num >= 1024 ** 3 and num2 >= 1024 ** 3:
+                return ((int(round(num / (1024 ** 3), 0)), 'GB'),
+                        (int(round(num2 / (1024 ** 3), 0)), 'GB'))
+            elif num >= 1024 ** 2 and num2 >= 1024 ** 2:
+                return ((int(round(num / (1024 ** 2), 0)), 'MB'),
+                        (int(round(num2 / (1024 ** 2), 0)), 'MB'))
+            elif num >= 1024 and num2 >= 1024:
+                return ((int(round(num / 1024, 0)), 'KB'),
+                        (int(round(num2 / 1024, 0)), 'KB'))
+            else:
+                return ((num, 'B'), (num2, 'B'))
 
     def _client(self, service, region):
 
@@ -155,8 +172,7 @@ class RAMSampler(BaseOpenstackSampler):
                        (stats.memory_mb * ram_ratio * 1024 * 1024) - reserved)
             cur_ram = cur_ram + stats.memory_mb_used * 1024 * 1024
 
-        ram_converted = self._convert(max_ram)
-        ram_converted_used = self._convert(cur_ram)
+        ram_converted, ram_converted_used = self._convert(max_ram, cur_ram)
 
         s = {'min': 0,
              'max': ram_converted[0],
@@ -266,13 +282,13 @@ class RegionsRAMSampler(BaseOpenstackSampler):
             max_ram = (stats.memory_mb * ram_ratio * 1024 * 1024) - reserved
             cur_ram = stats.memory_mb_used * 1024 * 1024
 
-            ram_converted = self._convert(max_ram)[0]
-            ram_converted_used = self._convert(cur_ram)[0]
+            ram_converted, ram_converted_used = self._convert(max_ram, cur_ram)
 
             regions.append({'name': region,
-                            'progress': ((ram_converted_used * 100.0) /
-                                         ram_converted),
-                            'max': ram_converted, 'value': ram_converted_used})
+                            'progress': ((ram_converted_used[0] * 100.0) /
+                                         ram_converted[0]),
+                            'max': ram_converted,
+                            'value': ram_converted_used[0]})
 
         return {'progress_items': regions}
 
