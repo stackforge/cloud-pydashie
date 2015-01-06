@@ -36,8 +36,10 @@ def run(args, conf, app, xyzzy):
         NagiosRegionSampler(xyzzy, 15, conf['nagios']),
         ResourceSampler(xyzzy, 60, conf['openstack'], client_cache,
                         response_cache),
-        APIRegionSampler(xyzzy, 15, conf['openstack'], client_cache, response_cache),
-        ServiceAPISampler(xyzzy, 15, conf['openstack'], client_cache, response_cache),
+        APIRegionSampler(xyzzy, 30, conf['openstack'], client_cache,
+                         response_cache),
+        ServiceAPISampler(xyzzy, 30, conf['openstack'], client_cache,
+                          response_cache),
     ]
 
     try:
