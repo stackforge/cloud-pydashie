@@ -265,7 +265,8 @@ class RegionsRAMSampler(BaseOpenstackSampler):
             max_ram = (stats.memory_mb * ram_ratio * 1024 * 1024) - reserved
             cur_ram = stats.memory_mb_used * 1024 * 1024
 
-            ram_converted, ram_converted_used = self._convert((max_ram, cur_ram))
+            ram_converted, ram_converted_used = self._convert((max_ram,
+                                                               cur_ram))
 
             regions.append({'name': region,
                             'progress': ((ram_converted_used[0] * 100.0) /
@@ -417,7 +418,8 @@ class ResourceSampler(BaseOpenstackSampler):
             resources['vpns'] = (resources['vpns'] +
                                  len(vpns['vpnservices']))
 
-            # volumes = cinder.volumes.list(search_opts={'all_tenants': 1})
+            # with self.timed(region, 'volume'):
+            #     volumes = cinder.volumes.list(search_opts={'all_tenants': 1})
             # resources['volumes'] = (resources['volumes'] +
             #                         len(volumes))
 
@@ -473,6 +475,13 @@ class BaseAPISamper(BaseOpenstackSampler):
 
 class APIRegionSampler(BaseAPISamper):
 
+    def __init__(self, app, interval, conf=None, client_cache={},
+                 response_cache={}, resync_period=180):
+        super(APIRegionSampler, self).__init__(app, interval, conf,
+                                               client_cache, response_cache)
+        self._no_sync = None
+        self._resync_period = resync_period
+
     def name(self):
         return 'api_region_response'
 
@@ -486,13 +495,31 @@ class APIRegionSampler(BaseAPISamper):
         displayedValue = ""
         series = []
 
+        x = None
+        equal = True
         for region, cache in self._response_cache['regions'].iteritems():
+            if x is None:
+                x = cache['x']
+            if x != cache['x']:
+                equal = False
             displayedValue += ("%s - (min: %s  max: %s  avg: %s)\n" %
                                (region,
                                 cache['stats']['min'],
                                 cache['stats']['max'],
                                 cache['stats']['avg']))
             series.append({'name': region, 'data': list(cache['items'])})
+
+        if equal:
+            self._no_sync = None
+        elif self._no_sync is None:
+                self._no_sync = datetime.datetime.utcnow()
+        elif ((datetime.datetime.utcnow() - self._no_sync).total_seconds() >
+              self._resync_period):
+            self._response_cache['regions'].clear()
+            displayedValue = "Clearing Cache to resync graphs"
+            series = []
+            self._no_sync = None
+
         return {'displayedValue': displayedValue, 'series': series}
 
 
