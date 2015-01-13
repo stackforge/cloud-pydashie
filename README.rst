@@ -29,9 +29,14 @@ Configuration is handled via a yaml file as follows:
             RegionOne:
                 vcpus_allocation_ratio: 2.0
                 ram_allocation_ratio: 1.0
-                # remove this amount per node available metric
+                # remove this amount per node available metric:
                 reserved_ram_per_node: 0
                 reserved_vcpus_per_node: 0
+                # remove this amount from total
+                # to take into account possible nova evacuate:
+                reserved_vcpus: 0
+                # ram in bytes
+                reserved_ram: 0
                 # total IPs are here as getting this from Neutron is
                 # far from straightforward
                 total_floating_ips: 256
@@ -80,7 +85,7 @@ To then activate it:
 
 Now that you are in your environment, you will need to install all the required python libraries:
 
-    sudo pip install -r requirements.txt
+    pip install -r requirements.txt
 
 At this point you can install the app itself.
 
