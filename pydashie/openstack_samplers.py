@@ -21,7 +21,7 @@ class BaseOpenstackSampler(DashieSampler):
         self._response_cache = response_cache
         super(BaseOpenstackSampler, self).__init__(app, interval)
 
-    def _convert(self, values):
+    def _convert(self, values, min_rounded):
         # takes array of byte counts; returns array of value,unit pairs
 
         units = ['TB', 'GB', 'MB', 'KB', 'B']
@@ -30,7 +30,15 @@ class BaseOpenstackSampler(DashieSampler):
         for i, unit in enumerate(units):
             threshold = 1024 ** (len(units) - i - 1)
             if min_value >= threshold:
-                return [(int(round(v / threshold)), unit) for v in values]
+                rounded = [(int(round(v / threshold)), unit) for v in values]
+
+                over_min = True
+                for value in rounded:
+                    if value[0] < min_rounded:
+                        over_min = False
+
+                if over_min:
+                    return rounded
 
     def _client(self, service, region):
 
@@ -155,7 +163,7 @@ class RAMSampler(BaseOpenstackSampler):
                        (stats.memory_mb * ram_ratio * 1024 * 1024) - reserved)
             cur_ram = cur_ram + stats.memory_mb_used * 1024 * 1024
 
-        ram_converted, ram_converted_used = self._convert((max_ram, cur_ram))
+        ram_converted, ram_converted_used = self._convert((max_ram, cur_ram), 5)
 
         s = {'min': 0,
              'max': ram_converted[0],
@@ -266,7 +274,7 @@ class RegionsRAMSampler(BaseOpenstackSampler):
             cur_ram = stats.memory_mb_used * 1024 * 1024
 
             ram_converted, ram_converted_used = self._convert((max_ram,
-                                                               cur_ram))
+                                                               cur_ram), 5)
 
             regions.append({'name': region,
                             'progress': ((ram_converted_used[0] * 100.0) /
