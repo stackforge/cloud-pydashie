@@ -24,7 +24,7 @@ class BaseOpenstackSampler(DashieSampler):
     def _convert(self, values):
         # takes array of byte counts; returns array of value,unit pairs
 
-        units = ['TB', 'GB', 'MB', 'KB', 'B']
+        units = ['GB', 'MB', 'KB', 'B']
         min_value = min(values)
 
         for i, unit in enumerate(units):
