@@ -1,4 +1,0 @@
-recursive-include pydashie/templates *
-recursive-include pydashie/assets *
-recursive-include pydashie/widgets *
-recursive-include pydashie/samplers *
